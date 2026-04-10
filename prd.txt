@@ -1,0 +1,421 @@
+Teaching Management System  |  Product Requirements Document    CONFIDENTIAL
+PRODUCT REQUIREMENTS DOCUMENT
+
+Teaching Management System
+ 
+Primary & Secondary Schools  |  Version 1.0  |  March 2026
+ 
+
+ 
+
+Document Title
+Teaching Management System — Product Requirements Document
+Version
+1.0 (Initial Draft)
+Date
+March 2026
+Scope
+Primary & Secondary Schools
+Status
+For Review
+Prepared By
+[Author Name]
+Approved By
+[Headmaster / Project Sponsor]
+ 
+1. Executive Summary
+
+This document defines the product requirements for a web-based Teaching Management System (TMS) serving both primary and secondary schools. The system centralises curriculum planning, lesson-resource management, student performance tracking, attendance, timetabling, and stakeholder communication across five distinct user roles: Teacher, Student, Parent, Headmaster, and Administrator.
+ 
+The TMS aims to:
+• Replace fragmented spreadsheets and paper-based workflows with a single source of truth for curriculum and performance data.
+• Give teachers structured tools to plan, track, and resource their teaching, subject to headmaster approval.
+• Provide students and parents with transparent, real-time visibility of academic progress.
+• Equip headmasters and administrators with school-wide dashboards to monitor teacher performance and student outcomes.
+• Support both primary and secondary school structures with a flexible, configurable grading system.
+ 
+2. Scope & Objectives
+
+2.1 In Scope
+• Role-based access control for five user roles.
+• Curriculum management with approval workflow.
+• Lesson resource library (video links and question papers per topic).
+• Weekly curriculum tracking and progress reporting.
+• Flexible grade recording with custom grading systems.
+• Attendance tracking (daily / per lesson).
+• Timetable management.
+• Student and teacher performance dashboards.
+• Syllabus approval workflow between teacher and headmaster.
+• User account management and access-request workflow.
+• Parent portal for performance and attendance visibility.
+ 
+2.2 Out of Scope (v1.0)
+• Real-time video conferencing or live classes.
+• Third-party LMS integration (e.g. Google Classroom, Moodle).
+• Email or in-app notification system.
+• Financial / fee management.
+ 
+3. Stakeholders & User Roles
+
+The system supports five distinct roles. Each role has a dedicated portal with permissions appropriate to their responsibilities.
+ 
+Role
+Primary Responsibilities
+Teacher
+Plans curriculum, tracks lesson delivery, manages student grades and resources.
+Student
+Views covered and upcoming topics, resources, and personal performance.
+Parent
+Monitors child's performance, attendance, and curriculum progress.
+Headmaster
+Approves syllabi, monitors school-wide performance and teacher delivery. Also holds full Admin capabilities.
+Admin
+Manages user accounts, system configuration, and onboarding. Works alongside the Headmaster on administrative tasks.
+ 
+4. Authentication & Access Control
+
+4.1 Login Page
+• Single login page for all user roles — role is determined post-authentication.
+• Fields: School ID, Username / Email, Password, and optional Remember Me.
+• 'Forgot Password' flow via registered email.
+• Account creation requests submitted via a public 'Request Account' form (pending admin approval).
+ 
+4.2 Role-Based Access
+• Each role sees only the navigation and data relevant to them.
+• Session timeout after configurable period of inactivity.
+• All data changes are audit-logged with timestamp and user ID.
+ 
+5. Teacher Module
+
+The Teacher module is the operational core of the TMS. It is split into four main feature areas: Curriculum Management, Lesson Resources, Student Grade Management, and the Teacher Dashboard.
+ 
+5.1 Subject & Class Selection
+• On first login (or via Profile Settings), a teacher selects the subjects they teach and the classes (year groups) they are assigned to.
+• Multiple subject/class combinations are supported.
+• Each combination generates an independent curriculum workspace.
+ 
+5.2 Curriculum Management
+5.2.1 Structure
+• Curriculum is organised hierarchically: Subject → Topic Heading → Sub-Heading → Week Plan.
+• Topics can be viewed in two modes: Topic View (heading/sub-heading tree) and Week View (calendar grid showing what is covered in each week).
+ 
+5.2.2 Editing Curriculum
+• Teachers can: Add topics, delete topics, move/reorder topics (drag-and-drop).
+• Each topic has: Title, Sub-heading, Description, Target Week(s), and linked Resources.
+• Edits are only permitted on a curriculum that has Draft status.
+ 
+5.2.3 Approval Workflow
+Draft
+Teacher edits freely. Not visible to students.
+Pending Approval
+Submitted by teacher. Headmaster receives notification and reviews.
+Approved / Locked
+No edits permitted. Curriculum is published to students.
+Change Requested
+Teacher submits a Change Request form explaining the reason. Headmaster reviews and approves/rejects the change.
+Rejected
+Headmaster rejects submission with comments. Teacher returns to Draft.
+ 
+Business Rule: Once a curriculum is Locked, the only way to modify it is via a formal Change Request. Any approved change creates a new version record.
+ 
+5.3 Weekly Tracking System
+• For each week in the curriculum plan, the teacher logs one of three statuses: Completed, Partially Completed (with notes), or Not Covered.
+• A remarks field is available for partial or non-delivery (e.g. school holiday, student assessment week).
+• The tracking view shows the plan vs. actuals side-by-side.
+• Headmaster dashboard consumes this data to monitor teacher delivery.
+• Students see the 'Completed' portions of the tracking log (topics covered so far).
+ 
+5.4 Lesson Resource Library
+5.4.1 Per-Topic Resources
+• Clicking any topic opens a Topic Detail Page with:
+◦ Topic metadata (heading, sub-heading, target weeks, status).
+◦ Question Papers — list of uploaded or linked PDF/documents.
+◦ Explanatory Videos — YouTube / external video URLs.
+ 
+5.4.2 Teacher Actions
+• Add a video link (URL + title + optional description).
+• Add a question paper (file upload or external URL + title).
+• Remove or replace any resource.
+• Toggle visibility per resource: Teacher Only vs. Visible to Students.
+ 
+5.4.3 Student Access
+• Students only see resources the teacher has marked Visible to Students.
+• Resources are displayed on the student's Topic View page.
+ 
+5.5 Student Grade & Behaviour Management
+5.5.1 Class Lists
+• Each subject/class workspace automatically populates with the students enrolled by the admin.
+• Teacher can view and manage the grade records for their students only.
+ 
+5.5.2 Grade Entry
+• Teacher selects the grade category: Exam / Test / Assessment / Behaviour / Other (configurable by admin).
+• For each grade entry: Assessment Name, Date, Grade (flexible format per grading system), and a Remarks field.
+• Multiple grade entries per student per subject are supported.
+• Bulk upload via CSV is supported for exam marks.
+ 
+5.5.3 Grading System Configuration
+The system supports multiple grading schemes configured at school level by the admin:
+Percentage
+Numeric 0–100. Pass/fail threshold configurable.
+Letter Grade
+A–F mapping, with optional +/- variants.
+Descriptive
+e.g. Excellent / Good / Satisfactory / Needs Improvement.
+Custom Numeric
+Any numeric scale (e.g. 1–10, 1–7).
+Combined
+Multiple schemes can coexist — e.g. percentage for exams, descriptive for behaviour.
+ 
+5.6 Teacher Performance Dashboard
+• Filters: Class, Subject, Date Range, Grade Category.
+• Widgets: Class average per assessment, Top / bottom performers, Grade distribution chart, Trend over time per student.
+• Highlighted alerts: Students performing below a configurable threshold are flagged in red.
+• Students who have shown significant improvement or decline are surfaced with trend indicators.
+• Export to PDF or CSV.
+ 
+6. Student Module
+
+The student portal gives learners a read-only, personalised view of their curriculum progress, resources, and academic performance.
+ 
+6.1 My Subjects
+• The student sees all subjects they are enrolled in.
+• Each subject shows the approved curriculum with topics marked as Covered, In Progress, or Upcoming based on the teacher's weekly tracking log.
+ 
+6.2 Topic View
+• Mirrors the teacher's Topic View but read-only.
+• Clicking a topic opens the Topic Detail Page showing:
+◦ Coverage status and the week it was/is planned for.
+◦ Visible question papers (teacher-approved).
+◦ Visible video links (teacher-approved).
+ 
+6.3 My Performance
+• Student sees all their own grade records across subjects.
+• Charts: subject average over time, comparison of individual grades to class average (anonymised).
+• Remarks from the teacher are displayed alongside each grade entry.
+• No other student's data is visible.
+ 
+6.4 My Timetable
+• Read-only view of the student's weekly timetable.
+• Shows subject, teacher, room, and time for each lesson.
+ 
+6.5 Attendance View
+• Student can view their own attendance record per subject.
+• Shows present, absent, and late records by date.
+ 
+7. Parent / Guardian Module
+
+The parent portal provides guardians with a transparent view of their child's academic progress, attendance, and curriculum coverage. Parents with multiple children can switch between child profiles.
+ 
+7.1 Child Overview Dashboard
+• Summary cards: Overall attendance %, latest grades per subject, curriculum progress (% of topics covered).
+• Alerts: Subjects below threshold, attendance below threshold, teacher remarks flagged as requiring attention.
+ 
+7.2 Academic Performance
+• Subject-by-subject grade breakdown.
+• Grade trend charts.
+• Teacher remarks visible.
+ 
+7.3 Curriculum Progress
+• Read-only topic view per subject: covered vs. upcoming.
+• No access to resources (videos/papers) unless admin enables this for parents).
+ 
+7.4 Attendance
+• Daily and per-subject attendance history.
+• Absences flagged with date.
+ 
+7.5 Timetable
+• Read-only weekly timetable for the child.
+ 
+8. Headmaster & Administrator Module
+
+The Headmaster holds both governance and administrative authority over the entire school. In addition to school-wide oversight responsibilities, the Headmaster can perform all Administrator functions directly. A dedicated Administrator account may also exist alongside the Headmaster to share the workload — the Admin role has access to the same administrative tools but does not have governance or approval authority.
+ 
+8.1 Pending Tasks Panel
+Both the Headmaster and Admin land on a Pending Tasks panel immediately after login. This panel surfaces all outstanding actions requiring attention so that urgent tasks can be completed quickly without navigating menus.
+ 
+Headmaster pending task types:
+• Syllabi awaiting approval — subject, teacher, class, submission date, and a direct Approve / Reject action.
+• Change requests awaiting review — reason summary, teacher, subject, and direct Approve / Reject action.
+• Account creation requests awaiting approval.
+• Students flagged below performance threshold (summary count with drill-down link).
+• Teachers flagged as significantly behind their curriculum delivery plan.
+• Students with attendance below the configured threshold.
+ 
+Admin pending task types:
+• Account creation requests awaiting approval.
+• Pending timetable conflicts or unassigned lessons.
+• Students or classes with incomplete enrolment data.
+ 
+Each pending item shows the key details inline and offers a single-click action (Approve, Reject, View) so that routine decisions can be taken directly from the panel without opening separate pages.
+ 
+8.2 Syllabus Approval
+• The pending tasks panel lists all syllabi submitted for approval with subject, teacher, class, and submission date.
+• Headmaster can: Review the full curriculum tree, Approve (locks the curriculum), Reject with written comments, or Request changes.
+• All approval actions are timestamped and form an audit trail.
+• The teacher's curriculum status is updated immediately upon the headmaster's action.
+ 
+8.3 Change Request Review
+• Pending change requests appear in the pending tasks panel with reason, subject, teacher, and date.
+• Headmaster approves or rejects each request.
+• Approved changes unlock the curriculum for edit, then require re-approval before locking again.
+ 
+8.4 School-Wide Student Performance Dashboard
+• Filters: Year Group / Class, Subject, Date Range, Grade Category, Teacher.
+• Widgets: School-wide grade distribution, Class averages, Top / bottom performing students (with privacy controls), Cohort trend over time.
+• Flagging: Students below threshold highlighted across all subjects.
+• Drill-down from school → class → individual student.
+• Export to PDF or Excel.
+ 
+8.5 Teacher Performance Dashboard
+• Filters: Teacher, Subject, Class, Term.
+• Widgets: Curriculum delivery rate (% of planned topics covered on time), Weekly tracking completion rate, Average assessment scores for each teacher's classes, Student progress vs. curriculum plan.
+• Teachers significantly behind their curriculum plan are flagged in the dashboard and surfaced in the pending tasks panel.
+ 
+8.6 Attendance Overview
+• School-wide attendance rates by class, subject, and date.
+• Students with attendance below the configured threshold are flagged and surfaced in the pending tasks panel.
+ 
+8.7 User Account Management
+8.7.1 Creating Accounts
+• Headmaster and Admin can create accounts for all roles: Teacher, Student, Parent, Headmaster, Admin.
+• Student and parent accounts can be linked (one parent to multiple students).
+• Bulk import of students via CSV for new academic year onboarding.
+ 
+8.7.2 Account Request Workflow
+Step 1
+User completes a public 'Request Account' form (name, role, email, school ID).
+Step 2
+Request appears in the Headmaster's and Admin's pending tasks panel for review.
+Step 3
+Headmaster or Admin approves (generates credentials) or rejects the request. The user is directed to log in or informed of the rejection.
+ 
+8.7.3 Account Lifecycle
+• Deactivate / reactivate accounts without deletion (data is retained).
+• Password reset on behalf of any user.
+• Role reassignment (e.g. teacher becomes headmaster).
+ 
+8.8 School Configuration
+• Academic Year / Term setup (dates, number of weeks per term).
+• Year groups and class definitions.
+• Subject catalogue (subject name, code, applicable year groups).
+• Grading system configuration per subject or school-wide.
+• Grade thresholds for performance flags (e.g. below 50% triggers a flag).
+• Attendance threshold for flags (e.g. below 80%).
+ 
+8.9 Timetable Management
+• Headmaster and Admin create and manage the master timetable.
+• Assigns: Subject + Class + Teacher + Room + Time Slot.
+• Timetable is read-only for all other roles.
+• Supports both primary (one class teacher model) and secondary (subject teacher model).
+ 
+8.10 Attendance Configuration
+• Define attendance windows per lesson / per day.
+• Attendance can be marked by teachers per lesson.
+• Absence reason codes configurable (e.g. Medical, Unexplained, School Trip).
+ 
+9. Attendance Tracking
+
+Attendance is tracked at both the lesson level and the daily level, depending on school configuration.
+ 
+9.1 Teacher Attendance Marking
+• At the start of each lesson, the teacher marks attendance for each student in their class: Present, Absent, or Late.
+• Optional: Reason code selection and free-text note.
+• Attendance records are timestamped and locked after 24 hours (configurable).
+ 
+9.2 Attendance Reports
+Report
+Available To
+Description
+Student Report
+Student, Parent, Teacher, Headmaster, Admin
+Full attendance history for a single student.
+Class Report
+Teacher, Headmaster, Admin
+Attendance summary for a class or subject group.
+School Report
+Headmaster, Admin
+Aggregated school-wide attendance rates.
+Absent Today
+Headmaster, Admin
+List of all absent students on a given date.
+ 
+10. Timetable Management
+
+10.1 Admin / Headmaster Timetable Builder
+• Drag-and-drop interface for placing lessons into a weekly grid.
+• Conflict detection: warns if a teacher or room is double-booked.
+• Supports daily and period-based structures.
+• Clone previous timetable as starting point for new term.
+ 
+10.2 Timetable Views
+• Teacher view: their own weekly schedule.
+• Student view: their own weekly schedule.
+• Class view (headmaster/admin): all lessons for a given class.
+• Teacher view (headmaster/admin): all lessons for a given teacher.
+• Room view (headmaster/admin): all lessons in a given room.
+ 
+11. Non-Functional Requirements
+
+ 
+Performance
+Page load under 2 seconds on standard broadband. Dashboard queries return in under 3 seconds.
+Availability
+99.5% uptime target, excluding planned maintenance windows (communicated 48 hours in advance).
+Security
+HTTPS enforced. Role-based access enforced at API level. Passwords hashed (bcrypt). PII encrypted at rest.
+Data Privacy
+Compliant with applicable data protection legislation (e.g. UK GDPR). Student data not shared externally.
+Scalability
+Must support up to 2,000 students, 200 teachers, and 20 classes concurrently per school instance.
+Browser Support
+Latest two versions of Chrome, Firefox, Safari, and Edge. Responsive design for tablets. Web-based only.
+Audit Logging
+All data modifications logged with user ID, timestamp, and change delta. Logs retained for 3 years.
+Backup
+Automated daily database backups. Recovery point objective (RPO): 24 hours. Recovery time objective (RTO): 4 hours.
+Accessibility
+WCAG 2.1 Level AA compliance for all user-facing pages.
+ 
+12. Assumptions
+
+ 
+• Each school operates as an independent instance.
+• The Headmaster or Admin performs initial setup of year groups, subjects, timetable, and grading systems before the system goes live.
+• All users have access to a modern web browser and internet connection.
+• The school will provide student and parent email addresses for account creation.
+• Grading systems are defined at the start of each academic year and do not change mid-year.
+• Video content is not hosted on the platform — only linked via external URLs (e.g. YouTube).
+• Third-party LMS integration (e.g. Google Classroom, Moodle) is out of scope for v1.0.
+• The system does not process financial transactions.
+ 
+13. Glossary
+
+ 
+TMS
+Teaching Management System — the product described in this document.
+Curriculum
+The complete set of topics planned for a subject within an academic year.
+Syllabus
+Used interchangeably with Curriculum in this document.
+Change Request
+A formal teacher-initiated request to modify a locked curriculum.
+Topic
+A unit of teaching content with a heading, sub-heading, and target week.
+Week View
+A calendar-style view mapping topics to specific delivery weeks.
+Tracking
+The teacher's weekly record of what was actually delivered vs. planned.
+Pending Tasks Panel
+A dashboard landing panel showing all outstanding actions for Headmaster and Admin.
+Grade Category
+A classification for a grade entry (Exam, Behaviour, Assessment, etc.).
+Threshold
+A configurable cut-off below which a student or metric is flagged.
+PRD
+Product Requirements Document.
+WCAG
+Web Content Accessibility Guidelines.
+RPO / RTO
+Recovery Point Objective / Recovery Time Objective (disaster recovery terms).
+ 
+Version 1.0  |  March 2026​Page
