@@ -44,6 +44,8 @@ Add `http://localhost:5173/reset-password` to redirect URLs for password reset.
 
 **Full demo account list and role flows:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md)
 
+**Client testing guide (non-technical, complete):** [docs/CLIENT_TESTING_GUIDE.md](docs/CLIENT_TESTING_GUIDE.md)
+
 ## Quick start (local Supabase)
 
 ```bash
