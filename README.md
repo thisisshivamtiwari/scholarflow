@@ -93,6 +93,13 @@ npm run db:cloud-seed
 
 Deployed Edge Functions: `admin-users`, `approve-account-request`, `import-grades-csv`, `send-notification`
 
+## Production
+
+**Live app:** https://scholarflow-iota.vercel.app  
+**Login:** https://scholarflow-iota.vercel.app/login
+
+Supabase Auth is configured for production + localhost redirect URLs.
+
 ## Deploy frontend (Vercel)
 
 Set environment variables:
