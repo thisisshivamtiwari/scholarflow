@@ -1,12 +1,15 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedAppLayout } from '@/components/auth/ProtectedAppLayout'
 import { RoleGuard } from '@/components/auth/RoleGuard'
 import { MarketingLayout } from '@/components/layout/MarketingLayout'
 import { AuthProvider } from '@/context/AuthContext'
 import { AttendanceConfigPage } from '@/pages/app/admin/AttendanceConfigPage'
+import { AdminDashboard } from '@/pages/app/admin/AdminDashboard'
 import { NotFoundApp } from '@/pages/app/NotFoundApp'
 import { RoleHomeRedirect } from '@/pages/app/RoleHomeRedirect'
 import { HeadmasterAttendancePage } from '@/pages/app/headmaster/HeadmasterAttendancePage'
+import { HeadmasterDashboard } from '@/pages/app/headmaster/HeadmasterDashboard'
 import { PendingTasksPage } from '@/pages/app/headmaster/PendingTasksPage'
 import { SchoolPerformancePage } from '@/pages/app/headmaster/SchoolPerformancePage'
 import { SyllabusReviewPage } from '@/pages/app/headmaster/SyllabusReviewPage'
@@ -16,10 +19,11 @@ import { UsersAdminPage } from '@/pages/app/headmaster/UsersAdminPage'
 import { ConfigurationPage } from '@/pages/app/headmaster/ConfigurationPage'
 import { ParentAttendance } from '@/pages/app/parent/ParentAttendance'
 import { ParentCurriculum } from '@/pages/app/parent/ParentCurriculum'
-import { ParentOverview } from '@/pages/app/parent/ParentOverview'
+import { ParentDashboard } from '@/pages/app/parent/ParentDashboard'
 import { ParentPerformance } from '@/pages/app/parent/ParentPerformance'
 import { ParentTimetable } from '@/pages/app/parent/ParentTimetable'
 import { StudentAttendance } from '@/pages/app/student/StudentAttendance'
+import { StudentDashboard } from '@/pages/app/student/StudentDashboard'
 import { StudentPerformance } from '@/pages/app/student/StudentPerformance'
 import { StudentSubjects } from '@/pages/app/student/StudentSubjects'
 import { StudentTopicDetail } from '@/pages/app/student/StudentTopicDetail'
@@ -36,11 +40,24 @@ import { CustomersPage } from '@/pages/CustomersPage'
 import { GetStartedPage } from '@/pages/GetStartedPage'
 import { HomePage } from '@/pages/HomePage'
 import { LoginPage } from '@/pages/LoginPage'
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage'
 import { PricingPage } from '@/pages/PricingPage'
 import { ProductPage } from '@/pages/ProductPage'
+import { AuditLogPage } from '@/pages/app/admin/AuditLogPage'
+import { SuperadminAccountRequestsPage } from '@/pages/app/superadmin/SuperadminAccountRequestsPage'
+import { SuperadminDashboardPage } from '@/pages/app/superadmin/SuperadminDashboardPage'
+import { SuperadminSchoolsPage } from '@/pages/app/superadmin/SuperadminSchoolsPage'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 30_000, retry: 1 },
+  },
+})
 
 const App = () => {
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -55,6 +72,8 @@ const App = () => {
           </Route>
 
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           <Route path="/app" element={<ProtectedAppLayout />}>
               <Route index element={<RoleHomeRedirect />} />
@@ -87,7 +106,8 @@ const App = () => {
               </Route>
 
               <Route path="student" element={<RoleGuard roles={['student']} />}>
-                <Route index element={<Navigate to="subjects" replace />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<StudentDashboard />} />
                 <Route path="subjects" element={<StudentSubjects />} />
                 <Route
                   path="subjects/:workspaceId/topics/:topicId"
@@ -99,8 +119,9 @@ const App = () => {
               </Route>
 
               <Route path="parent" element={<RoleGuard roles={['parent']} />}>
-                <Route index element={<Navigate to="overview" replace />} />
-                <Route path="overview" element={<ParentOverview />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<ParentDashboard />} />
+                <Route path="overview" element={<Navigate to="dashboard" replace />} />
                 <Route path="performance" element={<ParentPerformance />} />
                 <Route path="curriculum" element={<ParentCurriculum />} />
                 <Route path="attendance" element={<ParentAttendance />} />
@@ -108,7 +129,8 @@ const App = () => {
               </Route>
 
               <Route path="headmaster" element={<RoleGuard roles={['headmaster']} />}>
-                <Route index element={<Navigate to="pending" replace />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<HeadmasterDashboard />} />
                 <Route
                   path="pending"
                   element={<PendingTasksPage variant="headmaster" />}
@@ -126,15 +148,26 @@ const App = () => {
                 <Route path="users" element={<UsersAdminPage />} />
                 <Route path="configuration" element={<ConfigurationPage />} />
                 <Route path="timetable" element={<TimetableAdminPage />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
               </Route>
 
               <Route path="admin" element={<RoleGuard roles={['admin']} />}>
-                <Route index element={<Navigate to="pending" replace />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="pending" element={<PendingTasksPage variant="admin" />} />
                 <Route path="users" element={<UsersAdminPage />} />
                 <Route path="configuration" element={<ConfigurationPage />} />
                 <Route path="timetable" element={<TimetableAdminPage />} />
                 <Route path="attendance-config" element={<AttendanceConfigPage />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
+              </Route>
+
+              <Route path="superadmin" element={<RoleGuard roles={['superadmin']} />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<SuperadminDashboardPage />} />
+                <Route path="schools" element={<SuperadminSchoolsPage />} />
+                <Route path="account-requests" element={<SuperadminAccountRequestsPage />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
               </Route>
 
               <Route path="*" element={<NotFoundApp />} />
@@ -144,6 +177,7 @@ const App = () => {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

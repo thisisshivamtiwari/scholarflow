@@ -1,4 +1,4 @@
-export type Role = 'teacher' | 'student' | 'parent' | 'headmaster' | 'admin'
+export type Role = 'teacher' | 'student' | 'parent' | 'headmaster' | 'admin' | 'superadmin'
 
 export type CurriculumStatus =
   | 'draft'

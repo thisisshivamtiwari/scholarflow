@@ -1,12 +1,14 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   BookOpen,
+  Building2,
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
   LayoutDashboard,
   LineChart,
   Settings,
+  Shield,
   Users,
   UserSquare,
 } from 'lucide-react'
@@ -39,6 +41,12 @@ export const appNavItems: NavItem[] = [
     roles: ['teacher'],
   },
   {
+    to: '/app/student/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: ['student'],
+  },
+  {
     to: '/app/student/subjects',
     label: 'My subjects',
     icon: BookOpen,
@@ -63,8 +71,8 @@ export const appNavItems: NavItem[] = [
     roles: ['student'],
   },
   {
-    to: '/app/parent/overview',
-    label: 'Overview',
+    to: '/app/parent/dashboard',
+    label: 'Dashboard',
     icon: LayoutDashboard,
     roles: ['parent'],
   },
@@ -91,6 +99,12 @@ export const appNavItems: NavItem[] = [
     label: 'Timetable',
     icon: CalendarDays,
     roles: ['parent'],
+  },
+  {
+    to: '/app/headmaster/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: ['headmaster'],
   },
   {
     to: '/app/headmaster/pending',
@@ -135,6 +149,18 @@ export const appNavItems: NavItem[] = [
     roles: ['headmaster'],
   },
   {
+    to: '/app/headmaster/audit-log',
+    label: 'Audit log',
+    icon: ClipboardList,
+    roles: ['headmaster'],
+  },
+  {
+    to: '/app/admin/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: ['admin'],
+  },
+  {
     to: '/app/admin/pending',
     label: 'Pending tasks',
     icon: ClipboardList,
@@ -163,6 +189,36 @@ export const appNavItems: NavItem[] = [
     label: 'Attendance config',
     icon: ClipboardCheck,
     roles: ['admin'],
+  },
+  {
+    to: '/app/admin/audit-log',
+    label: 'Audit log',
+    icon: ClipboardList,
+    roles: ['admin'],
+  },
+  {
+    to: '/app/superadmin/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    roles: ['superadmin'],
+  },
+  {
+    to: '/app/superadmin/schools',
+    label: 'Schools',
+    icon: Building2,
+    roles: ['superadmin'],
+  },
+  {
+    to: '/app/superadmin/account-requests',
+    label: 'Account requests',
+    icon: Users,
+    roles: ['superadmin'],
+  },
+  {
+    to: '/app/superadmin/audit-log',
+    label: 'Audit log',
+    icon: Shield,
+    roles: ['superadmin'],
   },
 ]
 
