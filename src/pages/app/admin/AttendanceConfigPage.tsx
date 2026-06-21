@@ -3,15 +3,20 @@ import { useSchoolConfig, useConfigMutations } from '@/hooks/queries/useTmsData'
 import { configApi } from '@/lib/api/mutations'
 import { useQuery } from '@tanstack/react-query'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { QuerySkeleton } from '@/components/app/QuerySkeleton'
+import { LoadingButton } from '@/components/ui/LoadingButton'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 export const AttendanceConfigPage = () => {
-  const { data: school } = useSchoolConfig()
+  const { data: school, isLoading: schoolLoading } = useSchoolConfig()
   const { updateAttendanceLock } = useConfigMutations()
   const [code, setCode] = useState('')
   const [label, setLabel] = useState('')
   const [lockHours, setLockHours] = useState<number | ''>('')
 
-  const { data: codes, refetch } = useQuery({
+  const [addingCode, setAddingCode] = useState(false)
+
+  const { data: codes, isLoading: codesLoading, refetch } = useQuery({
     queryKey: ['attendance-reason-codes'],
     queryFn: async () => {
       const { data, error } = await configApi.reasonCodes()
@@ -26,6 +31,7 @@ export const AttendanceConfigPage = () => {
         <h1 className="text-2xl font-semibold text-foreground">Attendance configuration</h1>
         <p className="text-sm text-muted-foreground">PRD §8.10 — reason codes and lock window.</p>
 
+        <QuerySkeleton isLoading={schoolLoading} variant="form">
         <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold">Lock window</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -46,14 +52,28 @@ export const AttendanceConfigPage = () => {
               placeholder="Hours"
               className="w-24 rounded-lg border border-border px-3 py-2 text-sm"
             />
-            <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground">
+            <LoadingButton
+              type="submit"
+              loading={updateAttendanceLock.isPending}
+              loadingLabel="Updating…"
+              className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground"
+            >
               Update lock
-            </button>
+            </LoadingButton>
           </form>
         </section>
 
         <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold">Reason codes</h2>
+          {codesLoading ? (
+            <ul className="mt-3 space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <li key={i}>
+                  <Skeleton className="h-4 w-full max-w-xs" />
+                </li>
+              ))}
+            </ul>
+          ) : (
           <ul className="mt-3 space-y-1 text-sm">
             {(codes ?? []).map((c) => (
               <li key={c.id} className="flex justify-between">
@@ -68,23 +88,36 @@ export const AttendanceConfigPage = () => {
               </li>
             ))}
           </ul>
+          )}
           <form
             className="mt-4 flex flex-wrap gap-2"
             onSubmit={(e) => {
               e.preventDefault()
               if (!school || !code.trim()) return
-              configApi.addReasonCode(school.id, code.trim(), label.trim() || code.trim()).then(() => {
-                setCode('')
-                setLabel('')
-                void refetch()
-              })
+              setAddingCode(true)
+              void configApi
+                .addReasonCode(school.id, code.trim(), label.trim() || code.trim())
+                .then(() => {
+                  setCode('')
+                  setLabel('')
+                  return refetch()
+                })
+                .finally(() => setAddingCode(false))
             }}
           >
             <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Code" className="rounded-lg border px-3 py-2 text-sm" />
             <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label" className="flex-1 rounded-lg border px-3 py-2 text-sm" />
-            <button type="submit" className="rounded-lg border px-4 py-2 text-sm hover:bg-muted">Add</button>
+            <LoadingButton
+              type="submit"
+              loading={addingCode}
+              loadingLabel="Adding…"
+              className="rounded-lg border px-4 py-2 text-sm hover:bg-muted"
+            >
+              Add
+            </LoadingButton>
           </form>
         </section>
+        </QuerySkeleton>
       </div>
     </AppDataLoading>
   )

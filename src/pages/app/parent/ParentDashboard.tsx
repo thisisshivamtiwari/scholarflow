@@ -1,6 +1,7 @@
 import { AppDataLoading } from '@/components/app/AppDataLoading'
 import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { StatCard } from '@/components/dashboard/StatCard'
+import { PageSkeleton } from '@/components/ui/LoadingSkeletons'
 import { useAppData } from '@/context/AppDataContext'
 import { useParentChild } from '@/hooks/useParentChild'
 import {
@@ -13,7 +14,11 @@ import { AlertTriangle, BookOpen, LineChart } from 'lucide-react'
 
 export const ParentDashboard = () => {
   const { childId, childIds, setChildId } = useParentChild()
-  const { data } = useAppData()
+  const { data, isLoading } = useAppData()
+
+  if (isLoading) {
+    return <PageSkeleton variant="dashboard" />
+  }
 
   if (!childId) {
     return (

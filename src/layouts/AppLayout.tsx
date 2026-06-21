@@ -13,12 +13,15 @@ import { roleHomePath } from '@/config/roleHome'
 import { useAuth } from '@/context/AuthContext'
 import { useSessionTimeout } from '@/hooks/useSessionTimeout'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { FetchingBar } from '@/components/ui/FetchingBar'
+import { useAppData } from '@/context/AppDataContext'
 import { cn } from '@/lib/utils'
 
 const SIDEBAR_KEY = 'tms-sidebar-collapsed'
 
 export const AppLayout = () => {
   const { user, logout } = useAuth()
+  const { isFetching } = useAppData()
   useSessionTimeout()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(() => {
@@ -185,7 +188,8 @@ export const AppLayout = () => {
             <span className="hidden sm:inline">Sign out</span>
           </button>
         </header>
-        <main id="main" className="flex-1 overflow-auto px-4 py-6 sm:px-6 lg:px-8">
+        <main id="main" className="relative flex-1 overflow-auto px-4 py-6 sm:px-6 lg:px-8">
+          <FetchingBar active={user.role !== 'superadmin' && isFetching} />
           <AppDataLoading>
             <Outlet />
           </AppDataLoading>

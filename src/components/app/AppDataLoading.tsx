@@ -1,21 +1,23 @@
 import type { ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useAppData } from '@/context/AppDataContext'
+import { PageLoader, PageSkeleton } from '@/components/ui/LoadingSkeletons'
+import { pageSkeletonTableColumns, pageSkeletonVariant } from '@/lib/page-skeleton-variant'
 
 export const AppDataLoading = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth()
-  const { isLoading, error, data } = useAppData()
+  const { pathname } = useLocation()
+  const { isLoading, isFetching, error, data } = useAppData()
+  const variant = pageSkeletonVariant(pathname)
+  const tableColumns = pageSkeletonTableColumns(pathname)
 
   if (user?.role === 'superadmin') {
     return children
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-        Loading data…
-      </div>
-    )
+    return <PageSkeleton variant={variant} tableColumns={tableColumns} />
   }
 
   if (error) {
@@ -27,12 +29,17 @@ export const AppDataLoading = ({ children }: { children: ReactNode }) => {
   }
 
   if (!data) {
-    return (
-      <div className="text-sm text-muted-foreground">
-        No data available. Ensure Supabase is running and seeded.
-      </div>
-    )
+    return <PageLoader label="Preparing your workspace…" />
   }
 
-  return children
+  return (
+    <>
+      {isFetching ? (
+        <p className="sr-only" role="status" aria-live="polite">
+          Refreshing data…
+        </p>
+      ) : null}
+      {children}
+    </>
+  )
 }

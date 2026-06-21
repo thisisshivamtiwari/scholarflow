@@ -5,6 +5,8 @@ export const SITE = {
     'Curriculum, schedules, attendance, and family visibility—one connected workspace your whole campus can trust.',
 } as const
 
+export const DEMO_SCHOOL_ID = 'DEMO01'
+
 export type NavRoute = {
   label: string
   to: string

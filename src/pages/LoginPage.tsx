@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { DEMO_SCHOOL_ID } from '@/data/initialAppData'
+import { DEMO_SCHOOL_ID } from '@/constants/site'
 import { roleHomePath } from '@/config/roleHome'
 import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthFormSkeleton } from '@/components/ui/LoadingSkeletons'
+import { Spinner } from '@/components/ui/Spinner'
 
 export const LoginPage = () => {
-  const { isAuthenticated, user, login } = useAuth()
+  const { isAuthenticated, user, login, isLoading } = useAuth()
   const location = useLocation()
   const from = (location.state as { from?: string; passwordUpdated?: boolean } | null)?.from
   const passwordUpdated = (location.state as { passwordUpdated?: boolean } | null)?.passwordUpdated
@@ -22,6 +24,14 @@ export const LoginPage = () => {
     passwordUpdated ? 'Password updated. Sign in with your new password.' : null,
   )
   const [submitting, setSubmitting] = useState(false)
+
+  if (isLoading) {
+    return (
+      <AuthShell title="Sign in" subtitle="Checking your session…">
+        <AuthFormSkeleton />
+      </AuthShell>
+    )
+  }
 
   if (isAuthenticated && user) {
     return <Navigate to={redirectTo ?? roleHomePath(user.role)} replace />
@@ -109,9 +119,16 @@ export const LoginPage = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {submitting ? 'Signing in…' : 'Continue'}
+          {submitting ? (
+            <>
+              <Spinner size="sm" className="border-primary-foreground/30 border-t-primary-foreground" />
+              Signing in…
+            </>
+          ) : (
+            'Continue'
+          )}
         </button>
       </form>
 

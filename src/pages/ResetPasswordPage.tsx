@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthFormSkeleton } from '@/components/ui/LoadingSkeletons'
+import { Spinner } from '@/components/ui/Spinner'
 import { supabase } from '@/lib/supabase'
 
 export const ResetPasswordPage = () => {
@@ -69,7 +71,7 @@ export const ResetPasswordPage = () => {
   if (!ready) {
     return (
       <AuthShell title="Reset password" subtitle="Verifying your reset link…">
-        <p className="text-center text-sm text-muted-foreground">Please wait.</p>
+        <AuthFormSkeleton />
       </AuthShell>
     )
   }
@@ -115,9 +117,16 @@ export const ResetPasswordPage = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
         >
-          {submitting ? 'Saving…' : 'Update password'}
+          {submitting ? (
+            <>
+              <Spinner size="sm" className="border-primary-foreground/30 border-t-primary-foreground" />
+              Saving…
+            </>
+          ) : (
+            'Update password'
+          )}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">

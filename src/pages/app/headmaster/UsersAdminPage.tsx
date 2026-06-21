@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useProfiles, useUserAdminMutations } from '@/hooks/queries/useTmsData'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { QuerySkeleton } from '@/components/app/QuerySkeleton'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 import type { Role } from '@/types/tms'
 
 export const UsersAdminPage = () => {
@@ -31,8 +33,10 @@ export const UsersAdminPage = () => {
           >
             Add user
           </button>
-          <button
+          <LoadingButton
             type="button"
+            loading={importStudents.isPending}
+            loadingLabel="Importing…"
             onClick={() => {
               const input = document.createElement('input')
               input.type = 'file'
@@ -49,7 +53,7 @@ export const UsersAdminPage = () => {
             className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
           >
             Import students CSV
-          </button>
+          </LoadingButton>
         </div>
 
         {showCreate ? (
@@ -73,25 +77,30 @@ export const UsersAdminPage = () => {
             </select>
             <input placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
             <input placeholder="Class label (students)" value={form.classLabel} onChange={(e) => setForm({ ...form, classLabel: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
-            <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground sm:col-span-2">Create user</button>
+            <LoadingButton
+              type="submit"
+              loading={create.isPending}
+              loadingLabel="Creating…"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground sm:col-span-2"
+            >
+              Create user
+            </LoadingButton>
           </form>
         ) : null}
 
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading users…</p>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Role</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+        <QuerySkeleton isLoading={isLoading} variant="table" tableColumns={5}>
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="p-3">Name</th>
+                <th className="p-3">Email</th>
+                <th className="p-3">Role</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
                 {(profiles ?? []).map((u) => (
                   <tr key={u.id} className="border-t border-border">
                     <td className="p-3">{u.display_name}</td>
@@ -121,10 +130,10 @@ export const UsersAdminPage = () => {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+            </tbody>
+          </table>
+        </div>
+        </QuerySkeleton>
       </div>
     </AppDataLoading>
   )

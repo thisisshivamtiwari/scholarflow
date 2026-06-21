@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { workspaceById } from '@/lib/tms-helpers'
 import { cn } from '@/lib/utils'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 export const TeacherCurriculum = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>()
@@ -15,6 +16,7 @@ export const TeacherCurriculum = () => {
     addTopic,
     deleteTopic,
     createChangeRequest,
+    isFetching,
   } = useAppData()
   const [view, setView] = useState<'topic' | 'week'>('topic')
   const [newHeading, setNewHeading] = useState('')
@@ -47,13 +49,15 @@ export const TeacherCurriculum = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             {isDraft ? (
-              <button
+              <LoadingButton
                 type="button"
+                loading={isFetching}
+                loadingLabel="Submitting…"
                 onClick={() => submitCurriculumForApproval(ws.id)}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
               >
                 Submit for approval
-              </button>
+              </LoadingButton>
             ) : null}
           </div>
         </div>

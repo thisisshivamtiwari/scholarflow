@@ -5,12 +5,13 @@ import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
 import { studentName, studentsInWorkspace, workspaceById } from '@/lib/tms-helpers'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 import type { GradeCategory } from '@/types/tms'
 
 export const TeacherGrades = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const { user } = useAuth()
-  const { data, addGrade, importGradesCsv } = useAppData()
+  const { data, addGrade, importGradesCsv, isFetching } = useAppData()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({
     studentId: '',
@@ -69,13 +70,15 @@ export const TeacherGrades = () => {
           >
             Add grade
           </button>
-          <button
+          <LoadingButton
             type="button"
+            loading={isFetching}
+            loadingLabel="Importing…"
             onClick={handleCsvImport}
             className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
           >
             Import CSV
-          </button>
+          </LoadingButton>
         </div>
 
         {showForm ? (
@@ -151,9 +154,14 @@ export const TeacherGrades = () => {
                 className="mt-1 w-full rounded-lg border border-border px-3 py-2"
               />
             </label>
-            <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground sm:col-span-2">
+            <LoadingButton
+              type="submit"
+              loading={isFetching}
+              loadingLabel="Saving…"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground sm:col-span-2"
+            >
               Save grade
-            </button>
+            </LoadingButton>
           </form>
         ) : null}
 

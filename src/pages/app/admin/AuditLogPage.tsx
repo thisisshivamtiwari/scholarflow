@@ -1,19 +1,18 @@
 import { useAuditLogs } from '@/hooks/queries/useTmsData'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { QuerySkeleton } from '@/components/app/QuerySkeleton'
 
 export const AuditLogPage = () => {
   const { data: logs, isLoading } = useAuditLogs()
 
   return (
     <AppDataLoading>
-      <div className="mx-auto max-w-5xl space-y-6">
-        <h1 className="text-2xl font-semibold text-foreground">Audit log</h1>
-        <p className="text-sm text-muted-foreground">
-          All data modifications (PRD §4.2 / §11) — retained for compliance review.
-        </p>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading audit entries…</p>
-        ) : (
+      <QuerySkeleton isLoading={isLoading} variant="table" tableColumns={4}>
+        <div className="mx-auto max-w-5xl space-y-6">
+          <h1 className="text-2xl font-semibold text-foreground">Audit log</h1>
+          <p className="text-sm text-muted-foreground">
+            All data modifications (PRD §4.2 / §11) — retained for compliance review.
+          </p>
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="bg-muted/50">
@@ -45,8 +44,8 @@ export const AuditLogPage = () => {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      </QuerySkeleton>
     </AppDataLoading>
   )
 }

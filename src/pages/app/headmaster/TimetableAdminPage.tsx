@@ -9,6 +9,8 @@ import {
 } from '@dnd-kit/core'
 import { useSchoolConfig, useTimetableMutations, useTimetableSlots } from '@/hooks/queries/useTmsData'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { QuerySkeleton } from '@/components/app/QuerySkeleton'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as const
 const PERIODS = ['09:00', '10:15', '11:30', '13:00', '14:15'] as const
@@ -115,13 +117,18 @@ export const TimetableAdminPage = () => {
             <select value={form.day} onChange={(e) => setForm({ ...form, day: e.target.value as typeof form.day })} className="rounded border px-2 py-1 text-sm">
               {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
-            <button type="submit" className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">Save</button>
+            <LoadingButton
+              type="submit"
+              loading={create.isPending}
+              loadingLabel="Saving…"
+              className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground"
+            >
+              Save
+            </LoadingButton>
           </form>
         ) : null}
 
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading timetable…</p>
-        ) : (
+        <QuerySkeleton isLoading={isLoading} variant="timetable">
           <DndContext
             sensors={sensors}
             onDragStart={(e) => setActiveId(String(e.active.id))}
@@ -181,10 +188,12 @@ export const TimetableAdminPage = () => {
             </div>
             <DragOverlay>{activeId ? <div className="rounded bg-primary/20 p-2 text-xs">Moving…</div> : null}</DragOverlay>
           </DndContext>
-        )}
+        </QuerySkeleton>
 
-        <button
+        <LoadingButton
           type="button"
+          loading={create.isPending}
+          loadingLabel="Cloning…"
           className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-muted"
           onClick={() => {
             if (!school || !slots?.length) return
@@ -204,7 +213,7 @@ export const TimetableAdminPage = () => {
           }}
         >
           Clone timetable (duplicate all slots)
-        </button>
+        </LoadingButton>
       </div>
     </AppDataLoading>
   )

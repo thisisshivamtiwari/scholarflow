@@ -10,6 +10,7 @@ export const useAppData = () => {
   return {
     data: data as AppDataState,
     isLoading: q.isLoading,
+    isFetching: q.isFetching,
     error: q.error,
     refetch: q.refetch,
     approveSyllabus: (workspaceId: string) => q.approveSyllabus.mutate(workspaceId),

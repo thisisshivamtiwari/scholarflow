@@ -3,6 +3,7 @@ import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
 import { studentName, workspaceById } from '@/lib/tms-helpers'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
+import { LoadingButton } from '@/components/ui/LoadingButton'
 
 type Variant = 'headmaster' | 'admin'
 
@@ -16,6 +17,7 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
     rejectChangeRequest,
     approveAccountRequest,
     rejectAccountRequest,
+    isFetching,
   } = useAppData()
 
   const isHm = variant === 'headmaster' && user?.role === 'headmaster'
@@ -63,20 +65,24 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                       >
                         Review
                       </Link>
-                      <button
+                      <LoadingButton
                         type="button"
+                        loading={isFetching}
+                        loadingLabel="Approving…"
                         onClick={() => approveSyllabus(s.workspaceId)}
                         className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
                       >
                         Approve
-                      </button>
-                      <button
+                      </LoadingButton>
+                      <LoadingButton
                         type="button"
+                        loading={isFetching}
+                        loadingLabel="Rejecting…"
                         onClick={() => rejectSyllabus(s.workspaceId)}
                         className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
                       >
                         Reject
-                      </button>
+                      </LoadingButton>
                     </div>
                   </li>
                 )
@@ -104,20 +110,24 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                       {ws?.subjectName} · {c.requestedAt}
                     </p>
                     <div className="mt-3 flex gap-2">
-                      <button
+                      <LoadingButton
                         type="button"
+                        loading={isFetching}
+                        loadingLabel="Approving…"
                         onClick={() => approveChangeRequest(c.id)}
                         className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
                       >
                         Approve
-                      </button>
-                      <button
+                      </LoadingButton>
+                      <LoadingButton
                         type="button"
+                        loading={isFetching}
+                        loadingLabel="Rejecting…"
                         onClick={() => rejectChangeRequest(c.id)}
                         className="rounded-lg border border-border px-3 py-1.5 text-sm"
                       >
                         Reject
-                      </button>
+                      </LoadingButton>
                     </div>
                   </li>
                 )
@@ -144,20 +154,24 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <LoadingButton
                     type="button"
+                    loading={isFetching}
+                    loadingLabel="Approving…"
                     onClick={() => approveAccountRequest(a.id)}
                     className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
                   >
                     Approve
-                  </button>
-                  <button
+                  </LoadingButton>
+                  <LoadingButton
                     type="button"
+                    loading={isFetching}
+                    loadingLabel="Rejecting…"
                     onClick={() => rejectAccountRequest(a.id)}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm"
                   >
                     Reject
-                  </button>
+                  </LoadingButton>
                 </div>
               </li>
             ))}

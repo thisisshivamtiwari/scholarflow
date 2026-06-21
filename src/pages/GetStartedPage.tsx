@@ -2,8 +2,9 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { SITE } from '@/constants/site'
 import { AnimatedMount } from '@/components/motion/AnimatedMount'
+import { Spinner } from '@/components/ui/Spinner'
 import { useAccountRequestSubmit } from '@/hooks/queries/useTmsData'
-import { DEMO_SCHOOL_ID } from '@/data/initialAppData'
+import { DEMO_SCHOOL_ID } from '@/constants/site'
 
 export const GetStartedPage = () => {
   const submit = useAccountRequestSubmit()
@@ -69,8 +70,15 @@ export const GetStartedPage = () => {
                 <textarea id="notes" name="notes" rows={3} className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-sm" />
               </div>
               {error ? <p className="text-sm text-red-600">{error}</p> : null}
-              <button type="submit" disabled={submit.isPending} className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                {submit.isPending ? 'Submitting…' : 'Submit request'}
+              <button type="submit" disabled={submit.isPending} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+                {submit.isPending ? (
+                  <>
+                    <Spinner size="sm" className="border-primary-foreground/30 border-t-primary-foreground" />
+                    Submitting…
+                  </>
+                ) : (
+                  'Submit request'
+                )}
               </button>
             </form>
           )}

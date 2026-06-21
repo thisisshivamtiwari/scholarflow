@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from 'react'
+import { LoadingButton } from '@/components/ui/LoadingButton'
+import { PageSkeleton } from '@/components/ui/LoadingSkeletons'
 import { useCreateSchool, usePlatformSchools } from '@/hooks/queries/usePlatformData'
 
 export const SuperadminSchoolsPage = () => {
@@ -18,6 +20,10 @@ export const SuperadminSchoolsPage = () => {
     } catch (err) {
       setError((err as Error).message)
     }
+  }
+
+  if (isLoading) {
+    return <PageSkeleton variant="table" tableColumns={3} />
   }
 
   return (
@@ -63,13 +69,14 @@ export const SuperadminSchoolsPage = () => {
           </div>
         </div>
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button
+        <LoadingButton
           type="submit"
-          disabled={createSchool.isPending}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          loading={createSchool.isPending}
+          loadingLabel="Creating…"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
         >
-          {createSchool.isPending ? 'Creating…' : 'Create school'}
-        </button>
+          Create school
+        </LoadingButton>
       </form>
 
       <div className="overflow-x-auto rounded-xl border border-border">
@@ -82,13 +89,7 @@ export const SuperadminSchoolsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={3} className="p-4 text-muted-foreground">
-                  Loading schools…
-                </td>
-              </tr>
-            ) : (schools ?? []).length === 0 ? (
+            {(schools ?? []).length === 0 ? (
               <tr>
                 <td colSpan={3} className="p-4 text-muted-foreground">
                   No customer schools yet.

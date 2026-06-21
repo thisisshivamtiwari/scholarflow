@@ -42,9 +42,7 @@ Open http://localhost:5173/login
 Cloud auth is configured for `http://localhost:5173` (site URL + redirect allowlist).  
 Add `http://localhost:5173/reset-password` to redirect URLs for password reset.
 
-**Full demo account list and role flows:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md)
-
-**Client testing guide (non-technical, complete):** [docs/CLIENT_TESTING_GUIDE.md](docs/CLIENT_TESTING_GUIDE.md)
+**Client testing guide (non-technical, complete walkthrough):** [docs/CLIENT_TESTING_GUIDE.md](docs/CLIENT_TESTING_GUIDE.md)
 
 ## Quick start (local Supabase)
 
@@ -121,7 +119,8 @@ supabase/
   functions/   Edge Functions
 scripts/
   cloud-seed.mjs   Cloud demo seed (Auth Admin API + SQL)
-prd.txt        Product requirements document
+docs/
+  CLIENT_TESTING_GUIDE.md   Full client UAT walkthrough
 ```
 
 ## Architecture

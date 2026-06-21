@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { AuthShell } from '@/components/auth/AuthShell'
+import { AuthFormSkeleton } from '@/components/ui/LoadingSkeletons'
+import { Spinner } from '@/components/ui/Spinner'
 
 export const ForgotPasswordPage = () => {
-  const { requestPasswordReset } = useAuth()
+  const { requestPasswordReset, isLoading } = useAuth()
   const [schoolId, setSchoolId] = useState('')
   const [username, setUsername] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -27,6 +29,14 @@ export const ForgotPasswordPage = () => {
     } else {
       setError(result.error ?? 'Reset failed')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <AuthShell title="Reset password" subtitle="Checking your session…">
+        <AuthFormSkeleton />
+      </AuthShell>
+    )
   }
 
   return (
@@ -73,9 +83,16 @@ export const ForgotPasswordPage = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
         >
-          {submitting ? 'Sending…' : 'Send reset link'}
+          {submitting ? (
+            <>
+              <Spinner size="sm" className="border-primary-foreground/30 border-t-primary-foreground" />
+              Sending…
+            </>
+          ) : (
+            'Send reset link'
+          )}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
