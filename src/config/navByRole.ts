@@ -5,10 +5,12 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   LineChart,
   Settings,
   Shield,
+  Star,
   Users,
   UserSquare,
 } from 'lucide-react'
@@ -32,6 +34,24 @@ export const appNavItems: NavItem[] = [
     to: '/app/teacher/workspaces',
     label: 'Workspaces',
     icon: BookOpen,
+    roles: ['teacher'],
+  },
+  {
+    to: '/app/teacher/request-subject',
+    label: 'Request subject',
+    icon: ClipboardList,
+    roles: ['teacher'],
+  },
+  {
+    to: '/app/teacher/behaviour',
+    label: 'Behaviour',
+    icon: Star,
+    roles: ['teacher'],
+  },
+  {
+    to: '/app/teacher/academic-report',
+    label: 'Academic report',
+    icon: FileText,
     roles: ['teacher'],
   },
   {
@@ -92,6 +112,12 @@ export const appNavItems: NavItem[] = [
     to: '/app/parent/attendance',
     label: 'Attendance',
     icon: ClipboardCheck,
+    roles: ['parent'],
+  },
+  {
+    to: '/app/parent/behaviour',
+    label: 'Behaviour',
+    icon: Star,
     roles: ['parent'],
   },
   {

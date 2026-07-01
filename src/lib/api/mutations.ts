@@ -6,8 +6,13 @@ export const governanceApi = {
   approveSyllabus: async (workspaceId: string) => {
     throwIfMutationError(await supabase.rpc('approve_syllabus', { p_workspace_id: workspaceId }))
   },
-  rejectSyllabus: async (workspaceId: string) => {
-    throwIfMutationError(await supabase.rpc('reject_syllabus', { p_workspace_id: workspaceId }))
+  rejectSyllabus: async (workspaceId: string, reason?: string) => {
+    throwIfMutationError(
+      await supabase.rpc('reject_syllabus', {
+        p_workspace_id: workspaceId,
+        p_reason: reason ?? '',
+      }),
+    )
   },
   submitCurriculum: async (workspaceId: string) => {
     throwIfMutationError(
@@ -36,6 +41,30 @@ export const governanceApi = {
       requestId,
       action: 'reject',
     }),
+
+  approveSubjectRequest: async (requestId: string) => {
+    throwIfMutationError(
+      await supabase.rpc('approve_subject_request', { p_request_id: requestId }),
+    )
+  },
+
+  rejectSubjectRequest: async (requestId: string) => {
+    throwIfMutationError(
+      await supabase.rpc('reject_subject_request', { p_request_id: requestId }),
+    )
+  },
+
+  approveBehaviourRecord: async (recordId: string) => {
+    throwIfMutationError(
+      await supabase.rpc('approve_behaviour_record', { p_record_id: recordId }),
+    )
+  },
+
+  rejectBehaviourRecord: async (recordId: string) => {
+    throwIfMutationError(
+      await supabase.rpc('reject_behaviour_record', { p_record_id: recordId }),
+    )
+  },
 }
 
 export const workspaceApi = {
@@ -316,9 +345,11 @@ export const accountRequestApi = {
       .eq('external_id', payload.schoolExternalId.toUpperCase())
       .maybeSingle()
 
+    if (!school) throw new Error('School not found. Please select a valid school.')
+
     throwIfMutationError(
       await supabase.from('account_requests').insert({
-        school_id: school?.id ?? null,
+        school_id: school.id,
         school_external_id: payload.schoolExternalId.toUpperCase(),
         name: payload.name,
         email: payload.email,
@@ -347,6 +378,9 @@ export const usersApi = {
   resetPassword: (userId: string) =>
     invokeFunction('admin-users', { action: 'resetPassword', userId }),
 
+  setPassword: (userId: string, password: string) =>
+    invokeFunction('admin-users', { action: 'setPassword', userId, password }),
+
   updateRole: (userId: string, role: Role) =>
     invokeFunction('admin-users', { action: 'updateRole', userId, role }),
 
@@ -358,6 +392,56 @@ export const usersApi = {
 
   importStudentsCsv: (csvText: string) =>
     invokeFunction('admin-users', { action: 'importStudents', csvText }),
+}
+
+export const subjectRequestApi = {
+  submit: async (payload: {
+    subjectName: string
+    classLabel: string
+    notes?: string
+    teacherId: string
+    schoolId: string
+  }) => {
+    throwIfMutationError(
+      await supabase.from('subject_requests').insert({
+        school_id: payload.schoolId,
+        teacher_id: payload.teacherId,
+        subject_name: payload.subjectName,
+        class_label: payload.classLabel,
+        notes: payload.notes ?? '',
+      }),
+    )
+  },
+}
+
+export const behaviourApi = {
+  record: async (payload: {
+    workspaceId: string
+    studentId: string
+    date: string
+    rating: number
+    remark: string
+    recordedBy: string
+  }) => {
+    throwIfMutationError(
+      await supabase.from('behaviour_records').insert({
+        workspace_id: payload.workspaceId,
+        student_id: payload.studentId,
+        date: payload.date,
+        rating: payload.rating,
+        remark: payload.remark,
+        recorded_by: payload.recordedBy,
+      }),
+    )
+  },
+}
+
+export const onboardingApi = {
+  listSchools: async () => {
+    const { data, error } = await supabase.rpc('list_onboarding_schools')
+    if (error) throw error
+    return data ?? []
+  },
 }
 
 export const notificationApi = {

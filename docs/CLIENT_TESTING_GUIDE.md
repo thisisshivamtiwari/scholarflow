@@ -20,7 +20,7 @@ ScholarFlow is a **Teaching Management System (TMS)** for schools. It helps:
 - **School admins** handle day-to-day setup (users, timetable, attendance rules).
 - **Platform superadmin** (ScholarFlow operator) creates new schools on the system.
 
-Each person sees only what their job allows. A student cannot change grades; a parent cannot approve a syllabus; an admin cannot approve curriculum (that is the headmaster’s job).
+Each person sees only what their job allows. A student cannot change grades; a parent cannot approve a syllabus; teachers cannot lock their own curriculum without approval.
 
 ---
 
@@ -531,7 +531,7 @@ The system **records** when emails *would* be sent (e.g. syllabus approved, acco
 |-------|----------------|
 | “Invalid username or password” | School ID, username, password; superadmin leaves School ID blank |
 | Blank dashboard / “Failed to load data” | Internet connection; try refresh; sign out and in again |
-| Cannot approve syllabus | You must be signed in as **headmaster**, not admin |
+| Cannot approve syllabus | You must be signed in as **headmaster** or **admin** (Pending tasks → Syllabi) |
 | Student sees no topics | Curriculum may not be **locked** yet — headmaster must approve |
 | Password reset email not received | Email provider may not be configured for demo |
 
@@ -540,23 +540,57 @@ The system **records** when emails *would* be sent (e.g. syllabus approved, acco
 ## 20. Quick reference — all menu items by role
 
 ### Teacher
-Dashboard · Workspaces · Timetable  
+Dashboard · Workspaces · Request subject · Behaviour · Academic report · Timetable  
 *(Inside workspace: Curriculum · Weekly tracking · Grades · Attendance · Topic detail)*
 
 ### Student
 Dashboard · My subjects · My performance · Timetable · Attendance
 
 ### Parent
-Dashboard · Academic · Curriculum · Attendance · Timetable
+Dashboard · Academic · Curriculum · Attendance · Behaviour · Timetable
 
 ### Headmaster
 Dashboard · Pending tasks · School performance · Teacher performance · Attendance overview · Users · Configuration · Timetable · Audit log
 
 ### Admin
-Dashboard · Pending tasks · Users · Configuration · Timetable · Attendance config · Audit log
+Dashboard · Pending tasks (syllabi + subject requests) · Users · Configuration · Timetable · Attendance config · Audit log
 
 ### Superadmin
 Dashboard · Schools · Account requests · Audit log
+
+---
+
+## 21. PRD v1.0 — new flows to test
+
+### Account request (Get Started)
+1. Open `/get-started` (not signed in).
+2. Pick a school from the dropdown.
+3. Submit — request appears in **Admin** or **Headmaster → Pending tasks → Account requests**.
+
+### Subject request (teacher)
+1. Sign in as **teacher** → **Request subject**.
+2. Enter e.g. Mathematics / Year 9A → submit.
+3. **Admin** or **Headmaster** approves in Pending tasks → workspace created with GCSE template topics when available.
+
+### Curriculum planning & resubmit
+1. Teacher opens workspace **Curriculum** (draft or rejected).
+2. Reorder topics (↑↓), assign weeks via checkboxes, submit for approval.
+3. Admin/headmaster rejects with a reason → teacher sees banner and can **Resubmit**.
+
+### User password (admin)
+1. **Users** → **Set password** on a user → enter temp password → copy from confirmation banner.
+
+### Behaviour workflow
+1. Teacher → **Behaviour** → record rating + remark.
+2. Headmaster → Pending tasks → **Behaviour records** → approve.
+3. Parent → **Behaviour** → sees approved record only.
+
+### Academic report (teacher)
+1. **Academic report** → iframe opens GCSE Mathematics builder prefilled with teacher name and academic year.
+
+### Timetable (admin/headmaster)
+1. **Add lesson** — pick teacher from dropdown, link workspace, includes Sat/Sun columns.
+2. Drag lesson to another cell — success message appears.
 
 ---
 

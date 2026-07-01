@@ -12,7 +12,7 @@ type WeekStatus = 'completed' | 'partial' | 'not_covered'
 type Presence = 'present' | 'absent' | 'late'
 type GradeCategory = 'exam' | 'test' | 'assessment' | 'behaviour' | 'other'
 type ResourceKind = 'video' | 'paper'
-type TimetableDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri'
+type TimetableDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 type RequestStatus = 'pending' | 'approved' | 'rejected'
 
 type DefaultInsert = Record<string, unknown>
@@ -32,6 +32,7 @@ export type Database = {
           parent_resource_access: boolean
           session_timeout_minutes: number
           attendance_lock_hours: number
+          term_weeks: number
           created_at: string
           updated_at: string
         }
@@ -77,6 +78,8 @@ export type Database = {
           teacher_user_id: string
           curriculum_status: CurriculumStatus
           submitted_at: string | null
+          rejection_reason: string | null
+          term_weeks: number | null
           created_at: string
           updated_at: string
         }
@@ -211,6 +214,42 @@ export type Database = {
         Update: DefaultUpdate
         Relationships: []
       }
+      subject_requests: {
+        Row: {
+          id: string
+          school_id: string
+          teacher_id: string
+          subject_name: string
+          class_label: string
+          school_subject_id: string | null
+          notes: string
+          status: RequestStatus
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+        }
+        Insert: DefaultInsert
+        Update: DefaultUpdate
+        Relationships: []
+      }
+      behaviour_records: {
+        Row: {
+          id: string
+          workspace_id: string
+          student_id: string
+          date: string
+          rating: number
+          remark: string
+          status: RequestStatus
+          recorded_by: string
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+        }
+        Insert: DefaultInsert
+        Update: DefaultUpdate
+        Relationships: []
+      }
       student_enrollments: {
         Row: { student_id: string; workspace_id: string }
         Insert: DefaultInsert
@@ -309,13 +348,24 @@ export type Database = {
         Returns: string
       }
       approve_syllabus: { Args: { p_workspace_id: string }; Returns: undefined }
-      reject_syllabus: { Args: { p_workspace_id: string }; Returns: undefined }
+      reject_syllabus: {
+        Args: { p_workspace_id: string; p_reason?: string }
+        Returns: undefined
+      }
       submit_curriculum_for_approval: {
         Args: { p_workspace_id: string }
         Returns: undefined
       }
       approve_change_request: { Args: { p_request_id: string }; Returns: undefined }
       reject_change_request: { Args: { p_request_id: string }; Returns: undefined }
+      list_onboarding_schools: {
+        Args: Record<string, never>
+        Returns: { external_id: string; name: string }[]
+      }
+      approve_subject_request: { Args: { p_request_id: string }; Returns: string }
+      reject_subject_request: { Args: { p_request_id: string }; Returns: undefined }
+      approve_behaviour_record: { Args: { p_record_id: string }; Returns: undefined }
+      reject_behaviour_record: { Args: { p_record_id: string }; Returns: undefined }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

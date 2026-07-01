@@ -11,6 +11,9 @@ import {
   configApi,
   usersApi,
   accountRequestApi,
+  subjectRequestApi,
+  behaviourApi,
+  onboardingApi,
 } from '@/lib/api/mutations'
 import type { GradeCategory, Role } from '@/types/tms'
 
@@ -44,7 +47,8 @@ export const useAppData = () => {
       onSuccess: invalidate,
     }),
     rejectSyllabus: useMutation({
-      mutationFn: (workspaceId: string) => governanceApi.rejectSyllabus(workspaceId),
+      mutationFn: (p: { workspaceId: string; reason?: string }) =>
+        governanceApi.rejectSyllabus(p.workspaceId, p.reason),
       onSuccess: invalidate,
     }),
     approveChangeRequest: useMutation({
@@ -61,6 +65,22 @@ export const useAppData = () => {
     }),
     rejectAccountRequest: useMutation({
       mutationFn: (requestId: string) => governanceApi.rejectAccountRequest(requestId),
+      onSuccess: invalidate,
+    }),
+    approveSubjectRequest: useMutation({
+      mutationFn: (requestId: string) => governanceApi.approveSubjectRequest(requestId),
+      onSuccess: invalidate,
+    }),
+    rejectSubjectRequest: useMutation({
+      mutationFn: (requestId: string) => governanceApi.rejectSubjectRequest(requestId),
+      onSuccess: invalidate,
+    }),
+    approveBehaviourRecord: useMutation({
+      mutationFn: (recordId: string) => governanceApi.approveBehaviourRecord(recordId),
+      onSuccess: invalidate,
+    }),
+    rejectBehaviourRecord: useMutation({
+      mutationFn: (recordId: string) => governanceApi.rejectBehaviourRecord(recordId),
       onSuccess: invalidate,
     }),
     submitCurriculumForApproval: useMutation({
@@ -87,6 +107,18 @@ export const useAppData = () => {
     }),
     reorderTopics: useMutation({
       mutationFn: (orderedIds: string[]) => workspaceApi.reorderTopics(orderedIds),
+      onSuccess: invalidate,
+    }),
+    updateTopic: useMutation({
+      mutationFn: (p: {
+        topicId: string
+        patch: Partial<{
+          heading: string
+          sub_heading: string
+          description: string
+          target_weeks: number[]
+        }>
+      }) => workspaceApi.updateTopic(p.topicId, p.patch),
       onSuccess: invalidate,
     }),
     upsertTracking: useMutation({
@@ -247,6 +279,29 @@ export const useTimetableMutations = () => {
 export const useAccountRequestSubmit = () =>
   useMutation({ mutationFn: accountRequestApi.submit })
 
+export const useOnboardingSchools = () =>
+  useQuery({
+    queryKey: ['onboarding', 'schools'],
+    queryFn: () => onboardingApi.listSchools(),
+    staleTime: 60_000,
+  })
+
+export const useSubjectRequestSubmit = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: subjectRequestApi.submit,
+    onSuccess: () => qc.invalidateQueries({ queryKey: TMS_QUERY_KEY }),
+  })
+}
+
+export const useBehaviourMutations = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: behaviourApi.record,
+    onSuccess: () => qc.invalidateQueries({ queryKey: TMS_QUERY_KEY }),
+  })
+}
+
 export const useUserAdminMutations = () => {
   const qc = useQueryClient()
   const inv = () => qc.invalidateQueries({ queryKey: PROFILES_KEY })
@@ -255,6 +310,11 @@ export const useUserAdminMutations = () => {
     deactivate: useMutation({ mutationFn: usersApi.deactivate, onSuccess: inv }),
     reactivate: useMutation({ mutationFn: usersApi.reactivate, onSuccess: inv }),
     resetPassword: useMutation({ mutationFn: usersApi.resetPassword, onSuccess: inv }),
+    setPassword: useMutation({
+      mutationFn: (p: { userId: string; password: string }) =>
+        usersApi.setPassword(p.userId, p.password),
+      onSuccess: inv,
+    }),
     updateRole: useMutation({
       mutationFn: (p: { userId: string; role: Role }) =>
         usersApi.updateRole(p.userId, p.role),

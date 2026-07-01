@@ -49,6 +49,10 @@ Deno.serve(async (req) => {
 
     if (!request) throw new Error('Request not found')
 
+    if (request.school_id && request.school_id !== profile.school_id) {
+      throw new Error('Request belongs to another school')
+    }
+
     if (action === 'reject') {
       await supabaseAdmin
         .from('account_requests')

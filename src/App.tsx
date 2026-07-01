@@ -22,6 +22,7 @@ import { ParentCurriculum } from '@/pages/app/parent/ParentCurriculum'
 import { ParentDashboard } from '@/pages/app/parent/ParentDashboard'
 import { ParentPerformance } from '@/pages/app/parent/ParentPerformance'
 import { ParentTimetable } from '@/pages/app/parent/ParentTimetable'
+import { ParentBehaviour } from '@/pages/app/parent/ParentBehaviour'
 import { StudentAttendance } from '@/pages/app/student/StudentAttendance'
 import { StudentDashboard } from '@/pages/app/student/StudentDashboard'
 import { StudentPerformance } from '@/pages/app/student/StudentPerformance'
@@ -36,6 +37,9 @@ import { TeacherTimetable } from '@/pages/app/teacher/TeacherTimetable'
 import { TeacherTopicDetail } from '@/pages/app/teacher/TeacherTopicDetail'
 import { TeacherTracking } from '@/pages/app/teacher/TeacherTracking'
 import { TeacherWorkspaces } from '@/pages/app/teacher/TeacherWorkspaces'
+import { TeacherSubjectRequest } from '@/pages/app/teacher/TeacherSubjectRequest'
+import { TeacherBehaviour } from '@/pages/app/teacher/TeacherBehaviour'
+import { TeacherAcademicReport } from '@/pages/app/teacher/TeacherAcademicReport'
 import { CustomersPage } from '@/pages/CustomersPage'
 import { GetStartedPage } from '@/pages/GetStartedPage'
 import { HomePage } from '@/pages/HomePage'
@@ -82,6 +86,9 @@ const App = () => {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<TeacherDashboard />} />
                 <Route path="workspaces" element={<TeacherWorkspaces />} />
+                <Route path="request-subject" element={<TeacherSubjectRequest />} />
+                <Route path="behaviour" element={<TeacherBehaviour />} />
+                <Route path="academic-report" element={<TeacherAcademicReport />} />
                 <Route
                   path="workspaces/:workspaceId/curriculum"
                   element={<TeacherCurriculum />}
@@ -125,6 +132,7 @@ const App = () => {
                 <Route path="performance" element={<ParentPerformance />} />
                 <Route path="curriculum" element={<ParentCurriculum />} />
                 <Route path="attendance" element={<ParentAttendance />} />
+                <Route path="behaviour" element={<ParentBehaviour />} />
                 <Route path="timetable" element={<ParentTimetable />} />
               </Route>
 
@@ -155,6 +163,7 @@ const App = () => {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="pending" element={<PendingTasksPage variant="admin" />} />
+                <Route path="syllabus/:workspaceId" element={<SyllabusReviewPage />} />
                 <Route path="users" element={<UsersAdminPage />} />
                 <Route path="configuration" element={<ConfigurationPage />} />
                 <Route path="timetable" element={<TimetableAdminPage />} />

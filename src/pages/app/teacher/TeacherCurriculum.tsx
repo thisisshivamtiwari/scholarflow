@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
 import { workspaceById } from '@/lib/tms-helpers'
@@ -16,6 +16,8 @@ export const TeacherCurriculum = () => {
     addTopic,
     deleteTopic,
     createChangeRequest,
+    reorderTopics,
+    updateTopic,
     isFetching,
   } = useAppData()
   const [view, setView] = useState<'topic' | 'week'>('topic')
@@ -28,12 +30,33 @@ export const TeacherCurriculum = () => {
     ws &&
     (user.workspaceIds?.includes(ws.id) ?? false)
 
+  const termWeeks = useMemo(() => {
+    const n = ws?.termWeeks ?? data.school.termWeeks ?? 6
+    return Array.from({ length: n }, (_, i) => i + 1)
+  }, [ws?.termWeeks, data.school.termWeeks])
+
   if (!workspaceId || !ws || !allowed) {
     return <p className="text-sm text-muted-foreground">Workspace not found.</p>
   }
 
-  const isDraft = ws.curriculumStatus === 'draft'
+  const isEditable = ws.curriculumStatus === 'draft' || ws.curriculumStatus === 'rejected'
   const isLocked = ws.curriculumStatus === 'locked'
+  const isRejected = ws.curriculumStatus === 'rejected'
+
+  const moveTopic = (index: number, direction: -1 | 1) => {
+    const next = index + direction
+    if (next < 0 || next >= ws.topics.length) return
+    const ids = ws.topics.map((t) => t.id)
+    ;[ids[index], ids[next]] = [ids[next], ids[index]]
+    reorderTopics(ids)
+  }
+
+  const toggleWeek = (topicId: string, week: number, current: number[]) => {
+    const next = current.includes(week)
+      ? current.filter((w) => w !== week)
+      : [...current, week].sort((a, b) => a - b)
+    updateTopic({ topicId, patch: { target_weeks: next } })
+  }
 
   return (
     <AppDataLoading>
@@ -48,7 +71,7 @@ export const TeacherCurriculum = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {isDraft ? (
+            {isEditable ? (
               <LoadingButton
                 type="button"
                 loading={isFetching}
@@ -56,13 +79,19 @@ export const TeacherCurriculum = () => {
                 onClick={() => submitCurriculumForApproval(ws.id)}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
               >
-                Submit for approval
+                {isRejected ? 'Resubmit for approval' : 'Submit for approval'}
               </LoadingButton>
             ) : null}
           </div>
         </div>
 
-        {isDraft ? (
+        {isRejected && ws.rejectionReason ? (
+          <p className="mt-4 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+            <strong>Rejected:</strong> {ws.rejectionReason}
+          </p>
+        ) : null}
+
+        {isEditable ? (
           <form
             className="mt-6 flex flex-wrap gap-2"
             onSubmit={(e) => {
@@ -158,18 +187,60 @@ export const TeacherCurriculum = () => {
           <ul className="mt-6 space-y-3" role="list">
             {ws.topics.map((t, i) => (
               <li key={t.id} className="flex items-start gap-2">
-                <Link
-                  to={`/app/teacher/workspaces/${ws.id}/topics/${t.id}`}
-                  className="block flex-1 rounded-xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
-                >
+                {isEditable ? (
+                  <div className="flex flex-col gap-1 pt-4">
+                    <button
+                      type="button"
+                      disabled={i === 0}
+                      onClick={() => moveTopic(i, -1)}
+                      className="rounded border px-1 text-xs disabled:opacity-30"
+                      aria-label="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      disabled={i === ws.topics.length - 1}
+                      onClick={() => moveTopic(i, 1)}
+                      className="rounded border px-1 text-xs disabled:opacity-30"
+                      aria-label="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
+                ) : null}
+                <div className="block flex-1 rounded-xl border border-border bg-card p-4 shadow-sm">
                   <p className="text-xs font-medium text-muted-foreground">Topic {i + 1}</p>
-                  <p className="font-semibold text-foreground">{t.heading}</p>
+                  <Link
+                    to={`/app/teacher/workspaces/${ws.id}/topics/${t.id}`}
+                    className="font-semibold text-foreground hover:text-primary hover:underline"
+                  >
+                    {t.heading}
+                  </Link>
                   <p className="text-sm text-muted-foreground">{t.subHeading}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Weeks {t.targetWeeks.join(', ')}
-                  </p>
-                </Link>
-                {isDraft ? (
+                  {isEditable ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {termWeeks.map((week) => (
+                        <label
+                          key={week}
+                          className="inline-flex items-center gap-1 rounded border border-border px-2 py-0.5 text-xs"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={t.targetWeeks.includes(week)}
+                            onChange={() => toggleWeek(t.id, week, t.targetWeeks)}
+                          />
+                          W{week}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Weeks {t.targetWeeks.join(', ') || '—'}
+                    </p>
+                  )}
+                </div>
+                {isEditable ? (
                   <button
                     type="button"
                     onClick={() => deleteTopic(t.id)}
@@ -180,6 +251,9 @@ export const TeacherCurriculum = () => {
                 ) : null}
               </li>
             ))}
+            {ws.topics.length === 0 ? (
+              <li className="text-sm text-muted-foreground">No topics yet.</li>
+            ) : null}
           </ul>
         ) : (
           <div className="mt-6 overflow-x-auto rounded-xl border border-border">
@@ -191,7 +265,7 @@ export const TeacherCurriculum = () => {
                 </tr>
               </thead>
               <tbody>
-                {[1, 2, 3, 4, 5, 6].map((week) => {
+                {termWeeks.map((week) => {
                   const topics = ws.topics.filter((t) => t.targetWeeks.includes(week))
                   return (
                     <tr key={week} className="border-b border-border">

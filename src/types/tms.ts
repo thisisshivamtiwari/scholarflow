@@ -43,6 +43,7 @@ export type SchoolConfig = {
   gradeThresholdPercent: number
   attendanceThresholdPercent: number
   parentResourceAccess: boolean
+  termWeeks: number
 }
 
 export type ResourceItem = {
@@ -75,6 +76,8 @@ export type Workspace = {
   teacherUserId: string
   curriculumStatus: CurriculumStatus
   submittedAt?: string
+  rejectionReason?: string
+  termWeeks?: number
   topics: Topic[]
   tracking: WeekTracking[]
 }
@@ -107,7 +110,7 @@ export type AttendanceRecord = {
 
 export type TimetableSlot = {
   id: string
-  day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri'
+  day: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
   start: string
   end: string
   subjectName: string
@@ -138,6 +141,35 @@ export type AccountRequestPending = {
   requestedAt: string
 }
 
+export type SubjectRequestPending = {
+  id: string
+  teacherId: string
+  subjectName: string
+  classLabel: string
+  notes: string
+  requestedAt: string
+}
+
+export type BehaviourRecordPending = {
+  id: string
+  workspaceId: string
+  studentId: string
+  date: string
+  rating: number
+  remark: string
+  recordedAt: string
+}
+
+export type BehaviourRecord = {
+  id: string
+  workspaceId: string
+  studentId: string
+  date: string
+  rating: number
+  remark: string
+  status: 'pending' | 'approved' | 'rejected'
+}
+
 export type FlaggedStudent = {
   studentId: string
   reason: string
@@ -165,6 +197,9 @@ export type AppDataState = {
   syllabusPending: SyllabusPending[]
   changeRequests: ChangeRequestPending[]
   accountRequests: AccountRequestPending[]
+  subjectRequests: SubjectRequestPending[]
+  behaviourPending: BehaviourRecordPending[]
+  behaviourRecords: BehaviourRecord[]
   flaggedStudents: FlaggedStudent[]
   teacherBehindIds: string[]
   attendanceLowStudentIds: string[]

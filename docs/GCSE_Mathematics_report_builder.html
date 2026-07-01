@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathematics Report Builder</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Book Antiqua','Palatino Linotype',Palatino,Georgia,serif;font-size:11pt;background:#dde2ea;color:#000;padding:20px 14px 60px}
+.toolbar{background:#1F3864;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;border-radius:5px;font-family:Arial,sans-serif}
+.toolbar-title{font-weight:700;font-size:14px}
+.toolbar-sub{font-size:11px;opacity:.8;margin-top:2px}
+.tbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 14px;cursor:pointer;border-radius:3px;font-size:12px;font-family:Arial,sans-serif;transition:background .15s;margin-left:8px}
+.tbtn:hover{background:rgba(255,255,255,.28)}
+.tbtn-word{background:#2e7d32;border-color:#2e7d32;font-weight:700}
+.tbtn-word:hover{background:#1b5e20}
+.panel{max-width:820px;margin:0 auto 14px;background:#fff;border:1px solid #c2cedf;border-radius:5px;overflow:hidden;font-family:Arial,sans-serif;font-size:12px}
+.panel-hdr{background:#2E75B6;color:#fff;padding:9px 15px;font-weight:700;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.panel-hdr:hover{background:#1d5fa3}
+.panel-body{padding:14px;display:none}
+.panel-body.open{display:block}
+.ctrl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px 16px;margin-bottom:12px}
+.cf{display:flex;flex-direction:column;gap:4px}
+.cf label{font-weight:700;font-size:11px;color:#1F3864}
+.cf input{font-family:'Book Antiqua',Georgia,serif;font-size:10.5pt;border:1px solid #bbb;border-radius:3px;padding:5px 7px;background:#fafafa;color:#000}
+.cf input:focus{outline:2px solid #2E75B6}
+.g-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.g-row label{font-weight:700;font-size:11px;color:#1F3864;white-space:nowrap}
+.gbtn{padding:6px 16px;border:1.5px solid #bbb;background:#f5f5f5;border-radius:20px;cursor:pointer;font-family:Arial,sans-serif;font-size:12px;color:#444;transition:all .15s}
+.gbtn.active{background:#2E75B6;border-color:#2E75B6;color:#fff;font-weight:700}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-bottom:12px}
+.topic-col-hdr{font-weight:700;color:#1F3864;font-family:Arial,sans-serif;font-size:11px;margin-bottom:6px;border-bottom:1px solid #dde;padding-bottom:4px}
+.topic-cb-lbl{display:flex;align-items:flex-start;gap:6px;font-family:Arial,sans-serif;font-size:11px;color:#333;margin-bottom:5px;cursor:pointer;line-height:1.35}
+.topic-cb-lbl input{margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#2E75B6}
+.extra-input{width:100%;margin-top:6px;font-family:'Book Antiqua',Georgia,serif;font-size:10.5pt;border:1px solid #bbb;border-radius:3px;padding:5px 8px}
+/* Topic-sentence dropdowns */
+.topic-stmt-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+.topic-stmt-box{background:#f8f9fc;border:1px solid #d0dcea;border-radius:4px;padding:10px 12px}
+.topic-stmt-box-hdr{font-weight:700;font-size:11px;color:#1F3864;margin-bottom:6px}
+.topic-stmt-box select{width:100%;font-family:'Book Antiqua',Georgia,serif;font-size:9.5pt;border:1px solid #ccc;border-radius:3px;padding:4px 5px;background:#fff;cursor:pointer;color:#000}
+.topic-stmt-box select:focus{outline:1px solid #2E75B6}
+.topic-stmt-box .hint{font-size:10px;color:#888;margin-top:4px;font-family:Arial,sans-serif}
+/* Pickers */
+.pickers{max-width:820px;margin:0 auto 18px}
+.picker{background:#fff;border:1px solid #c2cedf;border-radius:5px;margin-bottom:8px;overflow:hidden;font-family:Arial,sans-serif;font-size:12px}
+.picker-hdr{background:#F0F4FA;border-bottom:1px solid #c2cedf;padding:8px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.picker-hdr:hover{background:#e3ecf7}
+.picker-hdr-title{font-weight:700;font-size:12px;color:#1F3864}
+.area-tag{font-size:10px;color:#fff;border-radius:10px;padding:2px 9px;margin-left:8px;font-weight:600}
+.picker-body{padding:10px 14px;display:none}
+.picker-body.open{display:block}
+.sub-row{display:grid;grid-template-columns:155px 1fr 1fr 1fr;gap:6px;align-items:start;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid #edf0f7}
+.sub-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.sub-lbl{font-size:11px;font-weight:700;color:#1F3864;padding-top:2px;line-height:1.3}
+.col-tag{font-size:10px;font-weight:700;text-align:center;padding:2px 4px;border-radius:3px;margin-bottom:3px}
+.col-tag.h{background:#E2EFDA;color:#375623}
+.col-tag.a{background:#FFF2CC;color:#7D6608}
+.col-tag.b{background:#FCE4D6;color:#7E2B0A}
+.pk-sel{width:100%;font-family:'Book Antiqua',Georgia,serif;font-size:9pt;padding:4px 5px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;color:#000}
+.pk-sel:focus{outline:1px solid #2E75B6}
+/* Page */
+.page{background:#fff;width:100%;max-width:820px;margin:0 auto;padding:28px 30px 36px;border:1px solid #bbb;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.doc-hdr-line{font-size:12pt;margin-bottom:8px}
+.hdr-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;margin-bottom:10px}
+.hdr-field{display:flex;align-items:center;gap:5px;border-bottom:1px solid #000;padding:3px 0}
+.hdr-field label{font-weight:bold;white-space:nowrap;font-size:10pt}
+.hdr-field input{border:none;outline:none;font-family:inherit;font-size:10.5pt;flex:1;background:transparent;color:#000}
+.main-tbl{width:100%;border-collapse:collapse;border:1.5px solid #000;margin-bottom:12px}
+.main-tbl td{border:1px solid #000;vertical-align:top;padding:0}
+.cell-inner{padding:6px 8px 8px}
+.cell-lbl{font-weight:bold;font-size:10pt;display:block;margin-bottom:4px}
+.topic-list{list-style:none;padding:0;margin:0}
+.topic-list li{padding:1px 0 1px 14px;font-size:10pt;position:relative}
+.topic-list li::before{content:'▪';position:absolute;left:2px;font-size:8pt;top:2px}
+.text-section{padding:6px 8px;min-height:115px}
+.text-section-lbl{font-weight:bold;font-size:10pt;display:block;margin-bottom:5px}
+/* Editable prose area */
+.prose-area{font-size:10pt;line-height:1.65;color:#000;min-height:70px;outline:none;border:none;width:100%;font-family:'Book Antiqua','Palatino Linotype',Palatino,Georgia,serif;background:transparent;resize:none}
+.prose-area:empty::before{content:attr(data-placeholder);color:#ccc;font-style:italic;pointer-events:none}
+/* Rating table */
+.rating-tbl{width:100%;border-collapse:collapse;border:1.5px solid #000;font-size:10pt}
+.rating-tbl th,.rating-tbl td{border:1px solid #000;text-align:center;vertical-align:middle;padding:3px 4px}
+.rating-tbl th{font-weight:bold;background:#fff}
+.row-lbl{text-align:left!important;font-weight:bold;font-size:10pt;padding:5px 7px!important;width:190px;min-width:190px}
+.rating-cell{width:26px;min-width:26px;max-width:26px;height:26px;cursor:pointer;font-size:12pt;line-height:1;user-select:none;text-align:center;vertical-align:middle}
+.rating-cell:hover{background:#eef2ff}
+.rating-cell.ticked{background:#e4f0e4}
+.rating-cell.ticked::after{content:'✓';font-size:11pt}
+.col-grp-hdr{border-left:1.5px solid #000!important;width:78px;text-align:center}
+.toast{position:fixed;bottom:22px;right:22px;background:#1F3864;color:#fff;padding:9px 16px;border-radius:4px;font-family:Arial,sans-serif;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1}
+@media print{
+  body{background:#fff;padding:0}
+  .toolbar,.panel,.pickers{display:none!important}
+  .page{box-shadow:none;border:none;max-width:100%;padding:0}
+  .prose-area:empty::before{display:none}
+  .rating-cell{cursor:default}
+  @page{margin:13mm}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div>
+    <div class="toolbar-title">📋 Mathematics Report Builder</div>
+    <div class="toolbar-sub">Fill details · Select gender · Choose content · Pick statements · Click rating cells · Download Word</div>
+  </div>
+  <div style="display:flex;gap:0">
+    <button class="tbtn" onclick="clearAll()">Clear All</button>
+    <button class="tbtn tbtn-word" onclick="downloadWord()">⬇ Download Word</button>
+  </div>
+</div>
+
+<!-- ① PUPIL DETAILS -->
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel(this)">
+    <span>① Pupil Details &amp; Gender</span><span>▼</span>
+  </div>
+  <div class="panel-body open">
+    <div class="ctrl-grid">
+      <div class="cf"><label>Pupil Full Name</label><input type="text" id="f-name" placeholder="e.g. Sumayah Hussain" oninput="renderAll()"></div>
+      <div class="cf"><label>Teacher Name</label><input type="text" id="f-teacher" placeholder="e.g. Mr T Hussain" value="Mr T Hussain" oninput="renderAll()"></div>
+      <div class="cf"><label>Year Group</label><input type="text" id="f-year" placeholder="e.g. Year 11" oninput="renderAll()"></div>
+      <div class="cf"><label>Academic Year</label><input type="text" id="f-acyear" placeholder="e.g. 2024–25" oninput="renderAll()"></div>
+    </div>
+    <div class="g-row">
+      <label>Gender / Pronoun:</label>
+      <button class="gbtn active" id="g-male" onclick="setGender('male')">Male &nbsp;(he / his)</button>
+      <button class="gbtn" id="g-female" onclick="setGender('female')">Female &nbsp;(she / her)</button>
+      <button class="gbtn" id="g-neutral" onclick="setGender('neutral')">Gender neutral &nbsp;(they / their)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ② CONTENT COVERED -->
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel(this)">
+    <span>② Content Covered — tick topics taught this year</span><span>▼</span>
+  </div>
+  <div class="panel-body">
+    <div class="topic-grid">
+      <div><div class="topic-col-hdr">FOUNDATION TOPICS</div><div id="fnd-topics"></div></div>
+      <div><div class="topic-col-hdr">HIGHER TOPICS (additional)</div><div id="hgr-topics"></div></div>
+    </div>
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:#777">Any additional topics (comma-separated):</div>
+    <input class="extra-input" type="text" id="extra-topics" placeholder="e.g. Vectors, Trigonometric graphs" oninput="renderContent()">
+  </div>
+</div>
+
+<!-- ③ TOPIC SENTENCE DROPDOWNS -->
+<div class="panel">
+  <div class="panel-hdr" onclick="togglePanel(this)">
+    <span>③ Topic Sentences — areas of strength &amp; areas to develop</span><span>▼</span>
+  </div>
+  <div class="panel-body">
+    <div style="font-family:Arial,sans-serif;font-size:11px;color:#555;margin-bottom:10px">
+      Select topics from those ticked in ② above. These generate an opening sentence for each section. Hold <b>Ctrl / Cmd</b> to select multiple topics.
+    </div>
+    <div class="topic-stmt-row">
+      <div class="topic-stmt-box">
+        <div class="topic-stmt-box-hdr" style="color:#27824c">✅ Topics the pupil has done well in (Strengths)</div>
+        <select id="strength-topics" multiple size="7" onchange="renderStatements()"></select>
+        <div class="hint">These appear as: "<em>[Name] has shown a firm understanding of…</em>"</div>
+      </div>
+      <div class="topic-stmt-box">
+        <div class="topic-stmt-box-hdr" style="color:#c0392b">📌 Topics needing further work (Next Steps)</div>
+        <select id="nextstep-topics" multiple size="7" onchange="renderStatements()"></select>
+        <div class="hint">These appear as: "<em>[Name] should continue to develop…</em>"</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ STATEMENT PICKERS -->
+<div class="pickers" id="pickers"></div>
+
+<!-- ══ REPORT PAGE ══ -->
+<div class="page" id="report-page">
+  <div class="doc-hdr-line"><b>MATHEMATICS</b>&nbsp;&nbsp;Teacher: <span id="disp-teacher">Mr T Hussain</span></div>
+  <div class="hdr-fields">
+    <div class="hdr-field"><label>Pupil:</label><input id="disp-name" type="text" readonly placeholder="—"></div>
+    <div class="hdr-field"><label>Teacher:</label><input id="disp-teacher2" type="text" readonly placeholder="—"></div>
+    <div class="hdr-field"><label>Year Group:</label><input id="disp-year" type="text" readonly placeholder="—"></div>
+    <div class="hdr-field"><label>Academic Year:</label><input id="disp-acyear" type="text" readonly placeholder="—"></div>
+  </div>
+  <table class="main-tbl">
+    <tr>
+      <td style="width:50%"><div class="cell-inner"><span class="cell-lbl">CONTENT COVERED:</span><ul class="topic-list" id="content-col1"></ul></div></td>
+      <td style="width:50%"><div class="cell-inner" style="padding-top:6px"><ul class="topic-list" id="content-col2"></ul></div></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="border-top:1.5px solid #000">
+        <div class="text-section">
+          <span class="text-section-lbl">STRENGTHS:</span>
+          <div class="prose-area" id="strengths-out" contenteditable="true" data-placeholder="Select statements from the panels above — the text will appear here and can be edited directly…"></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="border-top:1.5px solid #000">
+        <div class="text-section">
+          <span class="text-section-lbl">NEXT STEPS:</span>
+          <div class="prose-area" id="nextsteps-out" contenteditable="true" data-placeholder="Select statements from the panels above — the text will appear here and can be edited directly…"></div>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <table class="rating-tbl" id="rating-tbl"></table>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+// ══════════════════════════════════════════
+// GENDER / PRONOUNS
+// ══════════════════════════════════════════
+let gender = 'male';
+const P = {
+  male:    {he:'he',his:'his',him:'him',himself:'himself',He:'He',His:'His',Him:'Him'},
+  female:  {he:'she',his:'her',him:'her',himself:'herself',He:'She',His:'Her',Him:'Her'},
+  neutral: {he:'they',his:'their',him:'them',himself:'themselves',He:'They',His:'Their',Him:'Them'}
+};
+function setGender(g){
+  gender=g;
+  ['male','female','neutral'].forEach(x=>document.getElementById('g-'+x).classList.toggle('active',x===g));
+  renderAll();
+}
+
+function getFirstName(){
+  const v=document.getElementById('f-name').value.trim();
+  if(!v)return '[Name]';
+  return v.split(/\s+/)[0];
+}
+function getFullName(){
+  return document.getElementById('f-name').value.trim()||'[Name]';
+}
+
+// Replace all template tokens with resolved values
+function applyTokens(text, firstName){
+  const pr=P[gender];
+  return text
+    .replace(/\[NAME\]/g, firstName)
+    .replace(/\[he\/she\]/g, pr.he).replace(/\[He\/She\]/g, pr.He)
+    .replace(/\[his\/her\]/g, pr.his).replace(/\[His\/Her\]/g, pr.His)
+    .replace(/\[him\/her\]/g, pr.him).replace(/\[Him\/Her\]/g, pr.Him)
+    .replace(/\[himself\/herself\]/g, pr.himself);
+}
+
+// Given a sentence that currently starts with firstName or firstName's,
+// replace the start with the appropriate pronoun form.
+function toPronouns(sentence, firstName){
+  const pr=P[gender];
+  const esc=firstName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  // "Umarah's ..." → "Her ..."
+  const rePoss=new RegExp('^'+esc+"'s\\b");
+  if(rePoss.test(sentence)){
+    const cap=pr.his.charAt(0).toUpperCase()+pr.his.slice(1);
+    return sentence.replace(rePoss, cap+"'s");
+  }
+  // "Umarah ..." → "She/He/They ..."
+  const reName=new RegExp('^'+esc+'\\b');
+  if(reName.test(sentence)){
+    return sentence.replace(reName, pr.He);
+  }
+  return sentence;
+}
+
+// Join sentences alternating name / pronoun start.
+// sentences already have firstName applied.
+// Odd-indexed sentences get pronoun-start treatment.
+function buildProseFromSentences(sentences, firstName){
+  if(!sentences||sentences.length===0)return '';
+  const out=sentences.map((s,i)=> i%2===0 ? s : toPronouns(s,firstName));
+  // Split into 2 paragraphs if >2 sentences
+  if(out.length<=2) return out.join(' ');
+  const mid=Math.ceil(out.length/2);
+  const p1=out.slice(0,mid).join(' ');
+  const p2=out.slice(mid).join(' ');
+  return p1+'\n\n'+p2;
+}
+
+// ══════════════════════════════════════════
+// CONTENT TOPICS
+// ══════════════════════════════════════════
+const FND_TOPICS=[
+  'Number: integers, decimals & rounding',
+  'Fractions, decimals & percentages',
+  'Ratio & proportion',
+  'Indices & standard form',
+  'Algebra: expressions & formulae',
+  'Algebra: equations & inequalities',
+  'Sequences & nth term',
+  'Coordinates & straight-line graphs',
+  'Quadratic & other graphs',
+  'Simultaneous equations',
+  'Geometry: angles & shape properties',
+  'Perimeter, area & volume',
+  'Transformations',
+  "Pythagoras' theorem",
+  'Trigonometry (SOH CAH TOA)',
+  'Circle: circumference & area',
+  'Statistics: averages & range',
+  'Statistical diagrams',
+  'Probability',
+  'Units, measures & compound measures',
+  'Constructions & loci',
+  'Similarity & congruence',
+];
+const HGR_TOPICS=[
+  'Surds & irrational numbers',
+  'Functions & function notation',
+  'Algebraic fractions',
+  'Quadratic equations (completing the square / formula)',
+  'Quadratic inequalities',
+  'Circle theorems',
+  'Further trigonometry (sine & cosine rules)',
+  'Trigonometric graphs & identities',
+  'Vectors',
+  'Direct & inverse proportion (algebraic)',
+  'Further statistics (histograms, cumulative frequency)',
+  'Conditional probability & tree diagrams',
+  'Iteration',
+  'Proof',
+  'Transformations of functions',
+  'Equation of a circle',
+];
+
+const topicChecked={};
+
+function buildTopicCheckboxes(){
+  function makeList(topics,id){
+    const c=document.getElementById(id);
+    topics.forEach(t=>{
+      topicChecked[t]=false;
+      const lbl=document.createElement('label');
+      lbl.className='topic-cb-lbl';
+      const cb=document.createElement('input');
+      cb.type='checkbox';
+      cb.onchange=()=>{topicChecked[t]=cb.checked;renderContent();updateTopicSelects();};
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(t));
+      c.appendChild(lbl);
+    });
+  }
+  makeList(FND_TOPICS,'fnd-topics');
+  makeList(HGR_TOPICS,'hgr-topics');
+}
+
+function getActiveTopics(){
+  const extras=document.getElementById('extra-topics').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const checked=Object.entries(topicChecked).filter(([,v])=>v).map(([k])=>k);
+  return [...checked,...extras];
+}
+
+function renderContent(){
+  const all=getActiveTopics();
+  const half=Math.ceil(all.length/2);
+  const col1=all.slice(0,half), col2=all.slice(half);
+  function toUL(items,id){
+    const el=document.getElementById(id);
+    el.innerHTML='';
+    if(items.length===0){const li=document.createElement('li');li.textContent='—';li.style.color='#ccc';el.appendChild(li);}
+    else items.forEach(t=>{const li=document.createElement('li');li.textContent=t;el.appendChild(li);});
+  }
+  toUL(col1,'content-col1');
+  toUL(col2,'content-col2');
+  updateTopicSelects();
+}
+
+function updateTopicSelects(){
+  const all=getActiveTopics();
+  ['strength-topics','nextstep-topics'].forEach(selId=>{
+    const sel=document.getElementById(selId);
+    const prev=Array.from(sel.selectedOptions).map(o=>o.value);
+    sel.innerHTML='';
+    all.forEach(t=>{
+      const opt=document.createElement('option');
+      opt.value=t;opt.textContent=t;
+      if(prev.includes(t))opt.selected=true;
+      sel.appendChild(opt);
+    });
+    if(all.length===0){
+      const opt=document.createElement('option');
+      opt.disabled=true;opt.textContent='— tick topics in ② first —';
+      sel.appendChild(opt);
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// STATEMENTS DATA
+// ══════════════════════════════════════════
+const SECTIONS=[
+  {id:'s1',title:'Attainment in Assessments',area:'strengths',subs:[
+    {name:'End-of-Year Exam Grade',stmts:[
+      ["[NAME] achieved an outstanding result in the end-of-year examination, finishing with [X]% and placing [him/her] among the highest performers in the year group.",
+       "[NAME] produced a solid performance in the end-of-year examination, achieving [X]% and meeting [his/her] target grade.",
+       "[NAME] found the end-of-year examination challenging, achieving [X]%, and will benefit from focused revision to strengthen [his/her] performance going forward."],
+      ["[NAME]'s final grade of [X]% is a testament to [his/her] dedication and hard work throughout the year.",
+       "[NAME] achieved [X]% in the end-of-year examination, a result that reflects consistent effort across the course.",
+       "[NAME] achieved [X]% in the end-of-year examination; with additional preparation and support, [he/she] has the ability to improve this result significantly."],
+      ["[NAME] excelled in the end-of-year examination, surpassing [his/her] target grade and demonstrating confident understanding across all topics assessed.",
+       "[NAME]'s examination result of [X]% shows [he/she] is working at the expected level; continued effort will help [him/her] push beyond this.",
+       "[NAME] scored [X]% in the end-of-year examination, which highlights the importance of consolidating core skills ahead of next year."],
+      ["With a final score of [X]%, [NAME] demonstrated the ability to perform under pressure across a range of demanding questions.",
+       "[NAME] approached the end-of-year examination with a positive attitude and achieved [X]%, a fair reflection of [his/her] ability at this stage.",
+       "[NAME] achieved [X]% in the end-of-year assessment; regular practice and revisiting key topics will be essential if [he/she] is to reach [his/her] potential."],
+      ["[NAME] recorded an impressive score of [X]%, confirming [his/her] position as one of the strongest mathematicians in the group.",
+       "[NAME] achieved [X]% in the final examination, meeting [his/her] predicted grade and demonstrating competence across the majority of the course.",
+       "[NAME] would benefit from developing greater confidence with examination technique; [his/her] score of [X]% does not fully reflect the effort [he/she] has shown in class."],
+      ["[NAME]'s end-of-year examination result of [X]% is an excellent achievement and reflects the high standards [he/she] has set throughout the year.",
+       "[NAME] performed in line with expectations in the end-of-year examination, securing [X]% and demonstrating a reasonable grasp of key topics.",
+       "[NAME] worked hard in the lead-up to the end-of-year examination; the result of [X]% shows some improvement, though further progress remains to be made."],
+    ]},
+    {name:'Topic Test Performance',stmts:[
+      ["[NAME] excelled across all topic assessments, consistently achieving high marks in algebra, geometry, number, and statistics.",
+       "[NAME] performed at a satisfactory level across most topic tests, demonstrating a reasonable understanding of the key areas.",
+       "[NAME] struggled to demonstrate secure knowledge in topic tests, particularly in algebra and geometry, where additional support is needed."],
+      ["[NAME] achieved exceptional scores in [his/her] algebra and number assessments, displaying a natural flair for abstract mathematical reasoning.",
+       "[NAME]'s topic test results have been generally positive, with particular strength shown in number work and a developing confidence in statistics.",
+       "[NAME]'s topic test results have been variable; [he/she] performed more confidently on number tasks but found algebra and geometry more demanding."],
+      ["[NAME] demonstrated mastery in geometry and trigonometry assessments, consistently producing accurate and well-presented solutions.",
+       "[NAME] showed a sound understanding of statistics, applying methods correctly and interpreting data appropriately.",
+       "[NAME] requires further practice in statistics and number; recent topic tests indicate that key methods have not yet been fully consolidated."],
+      ["[NAME]'s performance across topic tests has been consistently strong, with particular excellence in [his/her] work on functions and circle theorems.",
+       "[NAME] performed well in algebra tests but would benefit from further practice in geometry to achieve a more balanced profile across all topics.",
+       "[NAME] has made some progress in algebra this term, though topic test scores suggest [he/she] needs to spend more time consolidating core methods."],
+      ["[NAME] has achieved full or near-full marks in several topic tests, demonstrating exceptional depth of mathematical knowledge.",
+       "[NAME]'s topic test scores reflect steady progress across the year, with improvements in algebra and a consistently secure grasp of number.",
+       "[NAME] finds it difficult to transfer classroom learning into test conditions; focused revision of each topic area will help [him/her] improve [his/her] scores."],
+      ["Across all topic assessments, [NAME] demonstrated the ability to tackle complex problems with confidence and produce thorough, accurate responses.",
+       "[NAME] has achieved marks in line with the class average across topic tests, reflecting a working knowledge of the key areas.",
+       "[NAME]'s most recent topic tests show areas of strength in number which should be built upon; however, algebra and statistics require greater attention."],
+    ]},
+    {name:'Strengths in Assessment',stmts:[
+      ["[NAME] consistently demonstrates exceptional problem-solving skills, approaching complex questions with confidence and precision.",
+       "[NAME] shows a reliable ability to apply learned methods, producing clear and accurate working across a range of question types.",
+       "[NAME] shows real determination in assessments and is always willing to attempt every question, which is a positive foundation on which to build."],
+      ["[NAME] excels at multi-step problems, demonstrating a sophisticated understanding of how different areas of mathematics connect.",
+       "[NAME] presents [his/her] work clearly and logically in assessments, minimising avoidable errors.",
+       "[NAME] performs best when tackling familiar topics, and this confidence should be used as a platform to develop [his/her] broader mathematical ability."],
+      ["One of [NAME]'s greatest strengths is [his/her] ability to remain calm under pressure and work through problems systematically.",
+       "[NAME] has a good grasp of number-based questions and reliably picks up marks in this area across assessments.",
+       "[NAME] has shown improvement in managing assessment time, ensuring [he/she] is able to attempt a greater proportion of each paper."],
+      ["[NAME] applies [his/her] knowledge with remarkable accuracy, rarely making careless errors and always checking [his/her] work carefully.",
+       "[NAME] handles straightforward and mid-level questions well, securing a solid core of marks across each assessment.",
+       "[NAME] shows a growing willingness to attempt unfamiliar question types, which reflects a positive and developing attitude towards the subject."],
+      ["[NAME] demonstrates an impressive ability to recall and apply a wide range of mathematical techniques with ease.",
+       "[NAME] consistently answers the more structured parts of assessments well and shows good recall of methods taught in class.",
+       "[NAME]'s greatest strength is [his/her] persistence — [he/she] does not give up on difficult questions, which is a valuable quality to nurture."],
+      ["[NAME] is particularly adept at tackling the highest-mark questions, producing sophisticated responses that reflect true mathematical understanding.",
+       "[NAME] demonstrates good understanding when working with visual or diagrammatic questions, consistently scoring well in this area.",
+       "[NAME] benefits from a methodical approach; when [he/she] follows the correct process carefully, [he/she] is capable of achieving pleasing results."],
+    ]},
+  ]},
+  {id:'s2',title:'Progress Over Time',area:'strengths',subs:[
+    {name:'Progress & Consistency',stmts:[
+      ["[NAME] has made exceptional progress this year, demonstrating significant and sustained growth across all areas of the mathematics curriculum.",
+       "[NAME] has made steady progress from [his/her] starting point and is now working at the level expected for this stage of the course.",
+       "[NAME] has made limited progress this year and will require targeted support and intervention to accelerate [his/her] development going forward."],
+      ["From [his/her] initial assessment, [NAME] demonstrated outstanding improvement, consistently operating well above [his/her] starting level.",
+       "[NAME] has made pleasing progress in a number of key areas, particularly in number and algebra, and is building a more secure mathematical foundation.",
+       "[NAME] has found it difficult to build on [his/her] starting level; with structured support and regular practice, [he/she] can begin to make the expected progress."],
+      ["[NAME] has been a model of consistency throughout the year, maintaining high standards in every assessment and class task.",
+       "[NAME] has shown reasonable consistency across the year, with performance remaining broadly in line with expectations throughout.",
+       "[NAME]'s performance has been inconsistent this year, with strong periods undermined by others where engagement and output have fallen short."],
+      ["[NAME]'s progress this year has been remarkable — [he/she] has not only met but comfortably exceeded the expected rate of improvement.",
+       "[NAME] has progressed steadily throughout the year and, with continued effort, [he/she] is well-positioned to achieve [his/her] target grade.",
+       "[NAME] has made some progress from [his/her] starting point, but this has been inconsistent; regular engagement with revision will help [him/her] develop more steadily."],
+      ["The progress [NAME] has made this year is a credit to [his/her] commitment and determination to succeed in mathematics.",
+       "[NAME] has made progress in line with expectations and is developing the skills required for the next stage of [his/her] mathematical education.",
+       "[NAME] is working close to [his/her] starting level and has not yet demonstrated the progression expected at this stage; greater consistency and effort will be essential."],
+      ["[NAME] has set new personal bests in assessments this year, challenging [himself/herself] with the most demanding topics and consistently delivering excellent results.",
+       "[NAME] has shown consistent engagement with the subject, and this positive approach is reflected in [his/her] assessment results across the year.",
+       "Improving consistency will be one of [NAME]'s key goals going into next year; when [he/she] fully applies [himself/herself], the results are genuinely encouraging."],
+    ]},
+    {name:'Response to Feedback',stmts:[
+      ["[NAME] responds to feedback exceptionally well, consistently implementing suggestions and using them to improve [his/her] performance in subsequent tasks.",
+       "[NAME] generally responds well to feedback, making an effort to act on suggestions, though this could be done more consistently.",
+       "[NAME] has found it difficult to act on feedback effectively this year; developing this skill will be key to improving [his/her] performance going forward."],
+      ["[NAME]'s response to feedback is exemplary — [he/she] actively seeks out areas for improvement and takes every opportunity to refine [his/her] approach.",
+       "[NAME] responds positively to verbal feedback in class and shows an ability to make corrections when these are pointed out.",
+       "[NAME] often repeats the same errors despite feedback, suggesting that a more active approach to reviewing marked work is needed."],
+      ["[NAME] treats every piece of feedback as an opportunity to grow, and this reflective attitude is a key driver of [his/her] outstanding progress.",
+       "[NAME] acts on teacher feedback when given and is developing the valuable habit of self-correcting [his/her] work before submission.",
+       "[NAME] would benefit from reading feedback more carefully and setting aside time to address specific points before moving on to new tasks."],
+      ["[NAME] not only responds to feedback but actively seeks it, regularly approaching the teacher for additional guidance and acting on advice given.",
+       "[NAME] makes reasonable use of written feedback, though [he/she] would benefit from following up on comments more thoroughly and consistently.",
+       "[NAME] needs to develop a more proactive response to feedback; marking and comments are only valuable if acted upon, and this has not always been the case."],
+      ["The way in which [NAME] receives and implements feedback reflects [his/her] maturity and genuine desire to improve.",
+       "[NAME] has responded well to feedback on the whole, and the improvements seen in [his/her] work across the year are a direct reflection of this.",
+       "[NAME] should make responding to feedback a top priority; acting on teacher comments is one of the most effective routes to rapid improvement."],
+      ["[NAME] consistently uses feedback to elevate [his/her] work to an even higher standard, demonstrating a level of self-awareness and discipline that is commendable.",
+       "[NAME] is beginning to develop a more reflective approach to feedback, and this growth should be encouraged and built upon going into next year.",
+       "[NAME] has found responding to feedback challenging; working with the teacher to establish a clear feedback routine will help [him/her] develop this important skill."],
+    ]},
+  ]},
+  {id:'s3',title:'Classwork & Mathematical Communication',area:'strengths',subs:[
+    {name:'Classwork Quality & Written Working',stmts:[
+      ["[NAME] completes all class tasks to an exceptionally high standard, demonstrating accuracy, thoroughness, and a genuine commitment to excellence in every lesson.",
+       "[NAME] completes the majority of class tasks accurately and on time, demonstrating a solid work ethic in [his/her] day-to-day learning.",
+       "[NAME] frequently leaves class tasks incomplete and makes a significant number of errors, suggesting that key concepts have not yet been fully understood."],
+      ["[NAME]'s classwork is consistently accurate and complete — [he/she] never settles for less than [his/her] best and always checks [his/her] work carefully.",
+       "[NAME] generally completes class tasks to a satisfactory standard, with a reasonable level of accuracy across most areas.",
+       "[NAME] needs to improve both the quantity and accuracy of [his/her] classwork; ensuring tasks are completed fully in each lesson will be an important goal."],
+      ["[NAME]'s written working is exemplary — every step is shown clearly and logically, making [his/her] method easy to follow.",
+       "[NAME] shows [his/her] working in most cases, though [he/she] should aim to be more consistent in presenting each step clearly to secure all available method marks.",
+       "[NAME] rarely shows sufficient written working, which makes it difficult to identify where errors occur and limits the marks available in assessments."],
+      ["[NAME] consistently produces accurate, well-structured classwork, demonstrating mastery of the methods and concepts being taught.",
+       "[NAME]'s classwork is generally of a good standard, with most tasks completed accurately.",
+       "[NAME] is encouraged to make a greater effort to complete tasks accurately in lessons, as incomplete or inaccurate work is limiting [his/her] ability to consolidate new learning."],
+      ["The standard of [NAME]'s written mathematical working is consistently high, demonstrating not only correct answers but a deep understanding of the method behind each solution.",
+       "[NAME]'s working is generally clear and systematic; [he/she] should aim to maintain this standard across all types of questions.",
+       "[NAME] often writes very little working; even when the final answer is correct, the absence of method means marks can be lost — this must be addressed."],
+      ["[NAME]'s classwork and written solutions are of the highest quality — [he/she] is thorough, accurate, and always shows full working.",
+       "[NAME]'s classwork is completed to an acceptable standard, though [he/she] should look to increase the challenge [he/she] sets [himself/herself] within lessons.",
+       "[NAME] must make completing class tasks fully a priority in every lesson; the gaps left by incomplete work are having a cumulative impact on [his/her] understanding."],
+    ]},
+    {name:'Independence & Mathematical Vocabulary',stmts:[
+      ["[NAME] works with outstanding independence, rarely requiring teacher support and consistently demonstrating the ability to self-correct and move forward with confidence.",
+       "[NAME] works reasonably independently in class, seeking help when genuinely needed and making a good effort to attempt problems before asking for support.",
+       "[NAME] relies heavily on teacher support in lessons and needs to develop greater confidence and resilience in order to work more independently."],
+      ["[NAME] uses mathematical vocabulary with impressive accuracy and confidence, incorporating precise terminology naturally into [his/her] spoken and written responses.",
+       "[NAME] uses mathematical vocabulary appropriately in most situations and is developing a growing command of the correct terminology.",
+       "[NAME] uses limited mathematical vocabulary and would benefit from making a conscious effort to incorporate key terms into [his/her] work."],
+      ["[NAME]'s independence in the classroom is outstanding — [he/she] tackles challenges with initiative and manages [his/her] own learning effectively.",
+       "[NAME] shows a growing level of independence in class and is becoming more willing to persevere with difficult problems before seeking help.",
+       "[NAME] needs to develop greater independence in the classroom; [he/she] should attempt problems thoroughly before asking for help."],
+      ["[NAME]'s command of mathematical language is exceptional — [he/she] uses terminology precisely and confidently, enhancing the quality of [his/her] explanations.",
+       "[NAME] makes good use of mathematical vocabulary in class and is beginning to integrate key terms into [his/her] written working more consistently.",
+       "[NAME] often uses informal language where mathematical terms would be more appropriate; building vocabulary through regular practice will help [him/her] improve."],
+      ["[NAME] sets an excellent example of independent learning, regularly challenging [himself/herself] beyond the set task.",
+       "[NAME] works independently to an appropriate level and is making good progress in developing [his/her] self-reliance.",
+       "[NAME] is over-reliant on teacher guidance at present; developing strategies for self-checking and problem-solving will help [him/her] become more independent."],
+      ["[NAME] leads by example both in [his/her] independent work ethic and [his/her] precise and confident use of mathematical language.",
+       "[NAME] is developing [his/her] independence and mathematical communication well, and should continue to build on both as [he/she] progresses.",
+       "[NAME] must develop greater independence and begin to use mathematical vocabulary more precisely; both will significantly improve [his/her] performance."],
+    ]},
+  ]},
+  {id:'s4',title:'Attitude, Effort & Behaviour',area:'strengths',subs:[
+    {name:'Effort, Motivation & Resilience',stmts:[
+      ["[NAME]'s effort and motivation in mathematics are truly outstanding — [he/she] approaches every lesson with enthusiasm, determination, and a genuine desire to excel.",
+       "[NAME] demonstrates a positive attitude to learning and makes a consistent effort in lessons, contributing to a steady and encouraging level of progress.",
+       "[NAME]'s effort in mathematics has been inconsistent this year; there are too many occasions when [he/she] has not fully committed to the learning taking place."],
+      ["[NAME] is one of the most motivated students in the group — [he/she] is always eager to engage with new challenges and never settles for anything less than [his/her] best.",
+       "[NAME] shows good effort in lessons on the whole and is motivated to do well, though [he/she] should look to maintain this across all topics.",
+       "[NAME] needs to demonstrate greater effort and motivation; a more engaged and committed approach will have a direct and positive impact on [his/her] progress."],
+      ["[NAME] demonstrates exceptional resilience when faced with challenging problems, persisting with difficult tasks and approaching setbacks as opportunities to learn.",
+       "[NAME] shows a reasonable level of resilience when encountering difficulty, making a genuine effort to work through problems before seeking help.",
+       "[NAME] can become disheartened when faced with challenging problems and needs to develop greater resilience in order to make progress with difficult material."],
+      ["[NAME] thrives on challenge and actively seeks out the most difficult problems, demonstrating a level of mathematical resilience that is truly impressive.",
+       "[NAME] demonstrates good resilience in most situations, remaining positive when encountering difficulty.",
+       "[NAME] tends to give up quickly when [he/she] encounters problems [he/she] cannot immediately solve; developing a more resilient approach will be a key target next year."],
+      ["There is no question about [NAME]'s commitment to mathematics — [he/she] is consistently among the hardest-working students in the group.",
+       "[NAME] shows genuine motivation to improve and is increasingly willing to push [himself/herself] beyond [his/her] comfort zone.",
+       "[NAME] is capable of much greater effort than [he/she] has shown this year; with stronger motivation and application, [he/she] has the potential to make excellent progress."],
+      ["[NAME]'s motivation and work ethic are beyond reproach — [he/she] is an inspirational example of what can be achieved through sustained effort and determination.",
+       "[NAME] has demonstrated a positive attitude to mathematics throughout the year, and this commitment is a real strength that should be maintained.",
+       "[NAME]'s attitude to effort will need to improve significantly next year; [he/she] has real potential and it would be a shame to see this go unrealised."],
+    ]},
+    {name:'Behaviour, Focus & Participation',stmts:[
+      ["[NAME]'s behaviour and focus in mathematics lessons are exemplary — [he/she] is always attentive, respectful, and fully committed to the learning taking place.",
+       "[NAME] behaves well in mathematics lessons and maintains a reasonable level of focus, contributing positively to the learning environment.",
+       "[NAME]'s focus in mathematics lessons has been inconsistent this year; [he/she] must ensure [he/she] does not allow [himself/herself] to become distracted."],
+      ["[NAME] is a model student in terms of behaviour and focus — [he/she] is never off-task, always respectful, and a calming and positive presence in the classroom.",
+       "[NAME] generally maintains good focus in lessons and behaves in a manner that is conducive to learning.",
+       "[NAME] needs to work on maintaining [his/her] focus throughout lessons; there have been too many occasions this year where [he/she] has been distracted or off-task."],
+      ["[NAME] is an outstanding contributor to class discussions, consistently offering insightful, well-reasoned responses that enrich the mathematical conversation.",
+       "[NAME] participates in class discussions at an appropriate level, contributing answers and engaging with the ideas of others constructively.",
+       "[NAME] participates very little in class discussions and would benefit greatly from contributing more regularly."],
+      ["[NAME] leads class discussions with confidence and intellectual curiosity, regularly posing questions that challenge [his/her] peers.",
+       "[NAME] contributes to class discussions at a satisfactory level and is becoming more willing to share [his/her] thinking.",
+       "[NAME]'s reluctance to participate in class discussions is holding back [his/her] development; [he/she] has good ideas and should feel encouraged to share them."],
+      ["Not once this year has [NAME]'s behaviour or focus been anything less than exceptional — [he/she] is a genuine pleasure to teach.",
+       "[NAME] conducts [himself/herself] well in mathematics lessons and has a positive attitude towards the subject.",
+       "[NAME]'s behaviour in lessons has at times been a barrier to [his/her] learning and that of others; addressing this will be a priority at the start of next year."],
+      ["The focus and self-discipline [NAME] demonstrates in every lesson is truly impressive — [he/she] is always fully engaged, even in the most challenging of topics.",
+       "[NAME] behaves well in lessons and focuses adequately on the tasks set, though [he/she] should aim to maintain this standard more consistently.",
+       "[NAME] must make a serious commitment to improving [his/her] behaviour and focus in mathematics lessons next year; full engagement is both expected and essential."],
+    ]},
+  ]},
+  {id:'n1',title:'Next Steps: Revision & Exam Technique',area:'nextsteps',subs:[
+    {name:'Revision Strategy',stmts:[
+      ["[NAME] should continue to challenge [himself/herself] by exploring topics beyond the standard curriculum and attempting the most demanding extension questions.",
+       "[NAME] should make greater use of revision resources such as Hegarty Maths, Sparx, or Dr Frost, ensuring [he/she] revisits and consolidates all topics covered this year.",
+       "[NAME] must make regular use of revision platforms such as Hegarty Maths or Sparx as a matter of priority; consistent daily practice will have a significant impact on [his/her] progress."],
+      ["[NAME] is encouraged to practise past papers under timed, examination conditions in order to further develop [his/her] already strong examination technique.",
+       "[NAME] should begin practising past papers regularly, as this is one of the most effective ways to consolidate learning and build confidence ahead of assessments.",
+       "[NAME] must begin working through past papers under timed conditions; this will build the examination technique and time management skills that are currently limiting [his/her] performance."],
+      ["[NAME] should use data from online platforms to identify any remaining areas of weakness and address these proactively through independent study.",
+       "[NAME] would benefit from reviewing all marked assessments carefully, acting on each piece of written feedback, and revisiting any topics where marks were dropped.",
+       "[NAME] must address the identified gaps in [his/her] foundational knowledge as a priority; these are currently preventing [him/her] from accessing more complex topics with confidence."],
+      ["[NAME] should continue to challenge [himself/herself] by creating revision summaries, teaching concepts to others, or exploring enrichment materials beyond the GCSE.",
+       "[NAME] should create a structured revision plan that allocates regular time to each topic area, ensuring no gaps are left unaddressed before the next assessment.",
+       "[NAME] needs to develop a structured and consistent approach to revision; without regular consolidation, the gaps in [his/her] knowledge will continue to grow."],
+      ["[NAME] is encouraged to seek help from the teacher promptly when [he/she] encounters topics [he/she] finds difficult, rather than allowing gaps to accumulate.",
+       "[NAME] is encouraged to seek help from the teacher promptly when [he/she] encounters topics [he/she] finds difficult, rather than allowing gaps to accumulate.",
+       "[NAME] should approach next year with a clear commitment to completing all set revision tasks, attending any available support sessions, and seeking help as soon as difficulties arise."],
+      ["[NAME] would further strengthen [his/her] already impressive performance by diversifying [his/her] revision strategies and maintaining a record of topics mastered.",
+       "[NAME] should make it a priority to attend any additional support sessions available and to complete all set tasks on revision platforms without exception.",
+       "[NAME] will benefit from working closely with the teacher at the start of next year to develop a personalised revision plan targeting the specific areas of greatest difficulty."],
+    ]},
+    {name:'Examination Technique & Written Work',stmts:[
+      ["[NAME] should ensure all steps in [his/her] working are clearly shown in assessments, as this demonstrates method and secures marks even if a final answer contains an error.",
+       "[NAME] must ensure [he/she] always shows full written working in assessments; marks are awarded for method as well as for correct answers, and this habit will directly improve [his/her] results.",
+       "[NAME] must prioritise showing clear, step-by-step working in all assessments; without written method, marks cannot be awarded even when the approach is correct."],
+      ["[NAME] should continue to work on the precision of [his/her] written explanations, particularly for the higher-mark 'explain' and 'justify' questions in examinations.",
+       "[NAME] should pay closer attention to the command words in examination questions — particularly 'explain', 'justify', and 'show that' — ensuring [he/she] addresses precisely what is being asked.",
+       "[NAME] needs to develop a clear understanding of what is required in 'explain' and 'justify' questions; these frequently appear in assessments and are a key area for improvement."],
+      ["Although [NAME] performs to an exceptional standard, [he/she] should ensure [he/she] never loses marks through careless arithmetic; careful checking is essential.",
+       "[NAME] should improve [his/her] time management in assessments, ensuring [he/she] allocates sufficient time to every question.",
+       "[NAME] needs to improve [his/her] time management in formal assessments significantly; [he/she] must practise working to time to ensure all questions are attempted."],
+      ["[NAME] should build on [his/her] strong examination technique by ensuring [he/she] always re-reads questions carefully to avoid misinterpretation.",
+       "[NAME] should aim to read each examination question twice before attempting it, ensuring [he/she] fully understands what is being asked.",
+       "[NAME] must develop the discipline to check [his/her] answers before the end of each assessment; careless errors are currently costing [him/her] marks [he/she] is capable of securing."],
+      ["[NAME] should look to extend [his/her] use of diagrams, graphs, and visual representations where these support and clarify [his/her] written solutions.",
+       "[NAME] would benefit from practising a wider variety of question styles, paying particular attention to those that require explanation and reasoning.",
+       "[NAME] should use any remaining time in examinations to check [his/her] working thoroughly — this simple habit alone could meaningfully improve [his/her] results."],
+      ["[NAME] is encouraged to further develop [his/her] mathematical communication, ensuring solutions are presented in a clear, logical, and well-structured sequence.",
+       "[NAME] should make a focused effort to improve the quality of [his/her] mathematical communication and the precision of [his/her] written responses.",
+       "[NAME] needs to understand that mathematics examinations reward the process of thinking, not just the final answer; building the habit of showing all working clearly must be an absolute priority."],
+    ]},
+    {name:'Independent Study & Homework',stmts:[
+      ["[NAME] should continue to submit all homework to the exceptionally high standard [he/she] has set throughout the year; this outstanding work ethic is to be commended.",
+       "[NAME] must ensure all homework is completed on time and to the best of [his/her] ability; consistent independent practice is essential for consolidating classroom learning.",
+       "[NAME] must make a serious commitment to completing and submitting all homework on time; the regularity with which tasks are missed is having a direct and negative impact on [his/her] progress."],
+      ["[NAME] should continue to make excellent use of digital revision platforms, exploring additional tasks and using the data to guide [his/her] independent study.",
+       "[NAME] should aim to use revision platforms such as Hegarty Maths or Sparx at least three times per week, focusing on topics where [he/she] has lost marks in recent assessments.",
+       "[NAME] must begin using revision platforms such as Hegarty Maths or Sparx on a daily basis; the instant feedback these provide is invaluable for identifying and closing gaps."],
+      ["[NAME] is encouraged to explore mathematics beyond the set homework — through wider reading, competitions, or self-directed study on topics that interest [him/her].",
+       "[NAME] should treat homework as a genuine opportunity to practise and consolidate the methods covered in class, approaching each task with the same care [he/she] shows in lessons.",
+       "[NAME] should treat homework not as an optional extra but as an essential part of [his/her] mathematical development; without regular independent practice, gaps will continue to widen."],
+      ["[NAME] should continue to act on all written feedback from marked homework, using comments to refine and improve [his/her] understanding of each topic.",
+       "[NAME] should make a habit of reviewing all marked homework carefully, identifying recurring errors and seeking clarification on any method [he/she] does not fully understand.",
+       "[NAME] needs to develop greater responsibility for [his/her] own learning by completing all set tasks on time and following up on teacher feedback consistently."],
+      ["[NAME] should continue to set [himself/herself] ambitious targets for independent study, maintaining the high standards [he/she] has consistently demonstrated this year.",
+       "[NAME] would benefit from keeping a record of topics covered and any gaps identified, using this to guide [his/her] independent study between lessons and assessments.",
+       "[NAME] is encouraged to speak to the teacher at the start of next year to agree a realistic and structured plan for homework and independent study."],
+      ["[NAME] is commended for [his/her] exceptional record of homework submission; this reliability reflects a mature and professional approach to [his/her] mathematical education.",
+       "[NAME] has a generally good record for homework completion and should aim to maintain this, ensuring every piece of work submitted reflects [his/her] true ability.",
+       "[NAME]'s homework record must improve significantly next year; regular independent practice between lessons is not optional — it is a fundamental part of making progress in mathematics."],
+    ]},
+  ]},
+  {id:'n2',title:'Next Steps: Mathematical Skills to Develop',area:'nextsteps',subs:[
+    {name:'Skills Targets',stmts:[
+      ["[NAME] should continue to develop [his/her] algebraic fluency by working through a range of increasingly challenging problems that require [him/her] to apply and adapt familiar techniques.",
+       "[NAME] needs to dedicate time to strengthening [his/her] algebraic skills, which are currently limiting [his/her] access to some of the higher-mark questions.",
+       "[NAME] must address the fundamental gaps in [his/her] algebraic understanding as a matter of urgency; these are preventing [him/her] from making progress across a number of key topics."],
+      ["[NAME] is encouraged to further develop [his/her] problem-solving skills by tackling open-ended and unfamiliar problems that require creative and flexible mathematical thinking.",
+       "[NAME] should focus on developing greater flexibility in [his/her] approach to problem-solving, practising problems that require [him/her] to select and adapt methods.",
+       "[NAME] needs to build [his/her] problem-solving skills by working through structured, multi-step problems regularly; developing a systematic approach will help [him/her] with unfamiliar questions."],
+      ["[NAME] should look to further develop [his/her] ability to reason and justify, ensuring [he/she] can explain the 'why' behind mathematical processes as well as the 'how'.",
+       "[NAME] should practise writing clear, concise mathematical justifications in order to improve performance on the reasoning and proof elements of the GCSE.",
+       "[NAME] needs to develop [his/her] mathematical reasoning skills; [he/she] should practise explaining methods and justifying conclusions in writing on a regular basis."],
+      ["[NAME] should continue to challenge [himself/herself] with statistics and data interpretation questions, seeking to apply [his/her] skills to a wide range of real-world contexts.",
+       "[NAME] should spend additional time on statistics and data interpretation, as these areas with targeted practice will lead to meaningful gains in marks.",
+       "[NAME] must consolidate [his/her] understanding of statistical methods and data interpretation; these topics appear regularly in assessments and are currently a source of unnecessary mark loss."],
+      ["[NAME] should look to develop [his/her] geometric reasoning further, exploring the connections between circle theorems, trigonometry, and proof.",
+       "[NAME] should focus on developing a more secure understanding of geometry, as this is an area where targeted practice with worked examples will lead to rapid improvement.",
+       "[NAME] needs to consolidate [his/her] understanding of geometric concepts and properties; revisiting class notes and working through structured examples will help [him/her] build the confidence needed."],
+      ["[NAME] is encouraged to extend [his/her] mastery by exploring topics beyond the standard GCSE, such as further algebraic proof or advanced trigonometry.",
+       "[NAME] should prioritise closing the remaining gaps in [his/her] knowledge across all topic areas, using revision platforms and past papers to identify and address weaknesses.",
+       "[NAME] must make closing the gaps in [his/her] core mathematical knowledge the absolute priority for next year; without secure foundations, progress in more complex topics will remain limited."],
+    ]},
+  ]},
+  {id:'n3',title:'Teacher Summary Comment',area:'nextsteps',subs:[
+    {name:'Summary — Higher Ability',stmts:[
+      ["[NAME] has had an outstanding year in mathematics and it has been a genuine pleasure to teach [him/her]. [He/She] consistently demonstrates a deep and sophisticated understanding of mathematical concepts, approaching every topic with confidence, precision, and real intellectual curiosity. [His/Her] performance in assessments has been exceptional and [he/she] has exceeded [his/her] target grade at every assessment point this year. Going into next year, [NAME] should continue to challenge [himself/herself] by exploring mathematics beyond the standard curriculum and should look to further develop [his/her] written reasoning and justification skills. Well done, [NAME] — a truly excellent year.","—","—"],
+      ["[NAME] has made remarkable progress this year and has firmly established [himself/herself] as one of the strongest mathematicians in the group. [He/She] brings an outstanding level of enthusiasm and commitment to [his/her] mathematical studies, reflected in both [his/her] superb assessment results and [his/her] impressive performance in lessons. The key next steps for [NAME] are to continue extending [his/her] mastery into the most challenging areas of the curriculum, to make regular use of revision platforms to maintain [his/her] high standards, and to ensure [he/she] always shows full working in assessments. I look forward to seeing [his/her] continued success next year.","—","—"],
+      ["It is rare to see a student as gifted and dedicated as [NAME] in mathematics. [He/She] has excelled in every area of the subject this year, producing outstanding work in class, completing every homework to the highest standard, and achieving exceptional results in assessments. Going forward, [NAME] should continue to challenge [himself/herself] with open-ended problems, further develop the precision of [his/her] mathematical communication, and explore topics that stretch [his/her] thinking beyond the standard GCSE. A truly exceptional year — [NAME] should be immensely proud of what [he/she] has achieved.","—","—"],
+    ]},
+    {name:'Summary — Average Ability',stmts:[
+      ["—","[NAME] has had a positive year in mathematics, working consistently and demonstrating a solid commitment to [his/her] learning. [He/She] is performing in line with expectations and has made pleasing progress across a number of key topic areas. Going into next year, [NAME]'s priorities should be to make regular use of revision resources such as Hegarty Maths or Sparx, to ensure all homework is completed fully and on time, and to develop greater confidence in tackling more challenging problems independently. With sustained effort and a focused approach to revision, [he/she] is well-placed to make further progress.","—"],
+      ["—","[NAME] has worked hard this year and shown a commendable commitment to [his/her] mathematical development. [He/She] is meeting the expected standard and has demonstrated particular strength in [specific topic]. Key targets for next year include: improving the clarity of [his/her] written working in assessments, developing [his/her] resilience when faced with challenging problems, engaging regularly with revision platforms, and acting promptly on written feedback. With continued effort and focus, I am confident [NAME] can push beyond [his/her] current level.","—"],
+      ["—","[NAME] has made steady and encouraging progress in mathematics this year and is to be commended for the effort [he/she] has consistently shown. [He/She] is working at the expected level and has developed well in a number of areas, including [his/her] confidence in class discussions and [his/her] response to teacher feedback. Priorities for the coming year include: closing identified gaps through regular use of revision resources, improving the quality of [his/her] written explanations in assessments, completing all homework on time, and developing greater independence in lessons. Well done, [NAME] — keep building on this solid foundation.","—"],
+    ]},
+    {name:'Summary — Below Average',stmts:[
+      ["—","—","[NAME] has found mathematics challenging this year, and it is clear that there are significant gaps in [his/her] understanding that must be addressed as a matter of priority going forward. While [he/she] has shown determination on occasions, [his/her] progress has not been as strong as had been hoped and [he/she] is currently working below the expected standard. Key targets for next year are: making regular and sustained use of revision platforms such as Hegarty Maths, significantly improving [his/her] homework completion record, developing a more resilient and committed approach to lessons, and seeking help promptly when topics prove difficult. I know [NAME] is capable of more and I hope [he/she] approaches next year with renewed determination and belief in [himself/herself]."],
+      ["—","—","[NAME] has found mathematics challenging this year, but [he/she] has shown a willingness to try and has made some positive steps forward. [He/She] is currently working below the expected standard, and the focus for next year must be on developing a more secure foundation across the core areas. Specific targets include: improving homework completion, engaging consistently with revision platforms, developing greater resilience and independence in lessons, showing full working in all assessments, and working closely with the teacher to address the gaps in [his/her] knowledge. With the right mindset, commitment, and support, [NAME] has the ability to make the progress needed."],
+      ["—","—","This has been a challenging year for [NAME] in mathematics and there are a number of important areas that must be addressed. Specific targets for next year include: significantly improving [his/her] homework completion record, making daily use of revision platforms such as Sparx or Hegarty Maths, developing greater focus and resilience in lessons, ensuring full working is always shown in assessments, and working closely with the teacher to address the gaps in [his/her] foundational knowledge. [NAME] has real potential and I sincerely hope [he/she] approaches next year with renewed commitment and belief in [his/her] ability to succeed."],
+    ]},
+  ]},
+];
+// ══════════════════════════════════════════
+// RATING TABLE
+// ══════════════════════════════════════════
+const RATING_ROWS=['Character and conduct','Effort & application','Depth of understanding','Quality of written work','Quality of oral contributions','Punctuality of work','Performance in tests'];
+const RATING_COLS=['Below Average','Average','Good','Outstanding'];
+const tickState={};
+
+function buildRatingTable(){
+  const tbl=document.getElementById('rating-tbl');
+  tbl.style.tableLayout='fixed';
+  const thead=tbl.createTHead();
+  const hr=thead.insertRow();
+  const th0=document.createElement('th');
+  th0.style.cssText='text-align:left;width:195px;border:1px solid #000;padding:4px 7px';
+  hr.appendChild(th0);
+  RATING_COLS.forEach(col=>{
+    const th=document.createElement('th');
+    th.colSpan=3;th.className='col-grp-hdr';th.textContent=col;
+    hr.appendChild(th);
+  });
+  const tbody=tbl.createTBody();
+  RATING_ROWS.forEach(rowName=>{
+    const tr=tbody.insertRow();
+    const td0=tr.insertCell();td0.className='row-lbl';td0.textContent=rowName;
+    RATING_COLS.forEach(col=>{
+      for(let i=0;i<3;i++){
+        const td=tr.insertCell();
+        td.className='rating-cell';
+        if(i===0)td.style.borderLeft='1.5px solid #000';
+        const key=rowName+'|'+col+'|'+i;
+        tickState[key]=false;
+        td.onclick=()=>{
+          const wasOn=tickState[key];
+          RATING_COLS.forEach(c2=>{for(let j=0;j<3;j++)tickState[rowName+'|'+c2+'|'+j]=false;});
+          tickState[key]=!wasOn;
+          let ci=1;
+          RATING_COLS.forEach(c2=>{for(let j=0;j<3;j++){const k2=rowName+'|'+c2+'|'+j;tr.cells[ci].classList.toggle('ticked',tickState[k2]);ci++;}});
+        };
+      }
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// BUILD PICKER PANELS
+// ══════════════════════════════════════════
+const selected={};
+function buildPickers(){
+  const container=document.getElementById('pickers');
+  // Header label above pickers
+  const lbl=document.createElement('div');
+  lbl.style.cssText='max-width:820px;margin:0 auto 6px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#1F3864;padding-left:2px';
+  lbl.textContent='④ Statement Pickers — choose one statement per ability column for each subsection';
+  container.appendChild(lbl);
+
+  SECTIONS.forEach(sec=>{
+    const div=document.createElement('div');div.className='picker';
+    const hdr=document.createElement('div');hdr.className='picker-hdr';
+    const tag=sec.area==='strengths'
+      ? '<span class="area-tag" style="background:#27824c">Strengths</span>'
+      : '<span class="area-tag" style="background:#c0392b">Next Steps</span>';
+    hdr.innerHTML=`<span><span class="picker-hdr-title">${sec.title}</span>${tag}</span><span style="font-size:10px;color:#888">▼ expand</span>`;
+    const body=document.createElement('div');body.className='picker-body';
+    hdr.onclick=()=>{body.classList.toggle('open');hdr.querySelector('span:last-child').textContent=body.classList.contains('open')?'▲ collapse':'▼ expand';};
+
+    // col header row
+    const chdr=document.createElement('div');
+    chdr.style.cssText='display:grid;grid-template-columns:155px 1fr 1fr 1fr;gap:6px;margin-bottom:8px';
+    chdr.innerHTML='<div></div><div class="col-tag h">Higher</div><div class="col-tag a">Average</div><div class="col-tag b">Below Average</div>';
+    body.appendChild(chdr);
+
+    sec.subs.forEach((sub,si)=>{
+      const row=document.createElement('div');row.className='sub-row';
+      const lbl=document.createElement('div');lbl.className='sub-lbl';lbl.textContent=sub.name;row.appendChild(lbl);
+      [0,1,2].forEach(col=>{
+        const wrap=document.createElement('div');wrap.className='col-wrap';
+        const sel=document.createElement('select');sel.className='pk-sel';
+        const def=document.createElement('option');def.value='';def.textContent='— choose —';sel.appendChild(def);
+        sub.stmts.forEach((stmtRow,ri)=>{
+          const t=stmtRow[col];
+          if(t&&t!=='—'){
+            const opt=document.createElement('option');
+            opt.value=ri;
+            opt.textContent=t.length>64?t.substring(0,64)+'…':t;
+            opt.setAttribute('data-raw',t);
+            sel.appendChild(opt);
+          }
+        });
+        const key=`${sec.id}_${si}_${col}`;
+        sel.onchange=()=>{
+          if(sel.value!==''){const opt=sel.options[sel.selectedIndex];selected[key]={raw:opt.getAttribute('data-raw'),area:sec.area,order:Object.keys(selected).length};}
+          else delete selected[key];
+          renderStatements();
+        };
+        wrap.appendChild(sel);row.appendChild(wrap);
+      });
+      body.appendChild(row);
+    });
+    div.appendChild(hdr);div.appendChild(body);container.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════
+// RENDER STATEMENTS — first name + alternating pronouns
+// ══════════════════════════════════════════
+function toPronouns(sentence,firstName){
+  const pr=P[gender];
+  const esc=firstName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  // Possessive: "Umarah's" → "Her"
+  const rePoss=new RegExp('^'+esc+"'s\\b");
+  if(rePoss.test(sentence)){
+    const cap=pr.his.charAt(0).toUpperCase()+pr.his.slice(1);
+    return sentence.replace(rePoss,cap+"'s");
+  }
+  // Plain: "Umarah " → "She "
+  const reName=new RegExp('^'+esc+'\\b');
+  if(reName.test(sentence)) return sentence.replace(reName,pr.He);
+  return sentence;
+}
+
+function buildProse(sentences,firstName){
+  if(!sentences||sentences.length===0)return '';
+  const out=sentences.map((s,i)=>i%2===0?s:toPronouns(s,firstName));
+  if(out.length<=2)return out.join(' ');
+  const mid=Math.ceil(out.length/2);
+  return out.slice(0,mid).join(' ')+'\n\n'+out.slice(mid).join(' ');
+}
+
+function getTopicList(selId){
+  const sel=document.getElementById(selId);
+  if(!sel)return[];
+  return Array.from(sel.selectedOptions).map(o=>o.value).filter(Boolean);
+}
+
+function listToEnglish(arr){
+  if(arr.length===0)return'';
+  if(arr.length===1)return arr[0];
+  if(arr.length===2)return arr[0]+' and '+arr[1];
+  return arr.slice(0,-1).join(', ')+', and '+arr[arr.length-1];
+}
+
+function renderStatements(){
+  const fn=getFirstName();
+  const pr=P[gender];
+  const apply=t=>applyTokens(t,fn);
+
+  const allSel=Object.values(selected);
+  const strengthSents=allSel.filter(s=>s.area==='strengths').map(s=>apply(s.raw));
+  const nextstepSents=allSel.filter(s=>s.area==='nextsteps').map(s=>apply(s.raw));
+
+  // Topic-strength opener
+  const strongTopics=getTopicList('strength-topics');
+  let strengthOpener='';
+  if(strongTopics.length>0){
+    strengthOpener=`${fn} has demonstrated a firm understanding of the following topic${strongTopics.length>1?'s':''}: ${listToEnglish(strongTopics)}.`;
+  }
+
+  // Topic-nextstep opener
+  const weakTopics=getTopicList('nextstep-topics');
+  let nextstepOpener='';
+  if(weakTopics.length>0){
+    nextstepOpener=`${fn} should continue to develop ${pr.his} understanding of the following topic${weakTopics.length>1?'s':''}: ${listToEnglish(weakTopics)}.`;
+  }
+
+  const allStrength=strengthOpener?[strengthOpener,...strengthSents]:strengthSents;
+  const allNextstep=nextstepOpener?[nextstepOpener,...nextstepSents]:nextstepSents;
+
+  const sOut=document.getElementById('strengths-out');
+  const nOut=document.getElementById('nextsteps-out');
+
+  if(allStrength.length===0){
+    sOut.innerHTML='';
+  } else {
+    const prose=buildProse(allStrength,fn);
+    sOut.innerHTML=prose.split('\n\n').map(p=>`<p style="margin-bottom:5px">${p}</p>`).join('');
+  }
+
+  if(allNextstep.length===0){
+    nOut.innerHTML='';
+  } else {
+    const prose=buildProse(allNextstep,fn);
+    nOut.innerHTML=prose.split('\n\n').map(p=>`<p style="margin-bottom:5px">${p}</p>`).join('');
+  }
+}
+
+// ══════════════════════════════════════════
+// SYNC DISPLAY FIELDS
+// ══════════════════════════════════════════
+function renderAll(){
+  const name=getFullName();
+  const teacher=document.getElementById('f-teacher').value.trim();
+  const year=document.getElementById('f-year').value.trim();
+  const acyear=document.getElementById('f-acyear').value.trim();
+  document.getElementById('disp-teacher').textContent=teacher||'Mr T Hussain';
+  document.getElementById('disp-name').value=name;
+  document.getElementById('disp-teacher2').value=teacher;
+  document.getElementById('disp-year').value=year;
+  document.getElementById('disp-acyear').value=acyear;
+  renderStatements();
+}
+
+// ══════════════════════════════════════════
+// DOWNLOAD AS WORD (.docx)
+// Writes JSON to /tmp, runs Node.js generator, serves result
+// ══════════════════════════════════════════
+function downloadWord(){
+  const name       = getFullName() || '[Name]';
+  const teacher    = document.getElementById('f-teacher').value.trim() || 'Mr T Hussain';
+  const yearGroup  = document.getElementById('f-year').value.trim()    || '';
+  const acYear     = document.getElementById('f-acyear').value.trim()  || '';
+  const strengthsText = document.getElementById('strengths-out').innerText.trim();
+  const nextstepsText = document.getElementById('nextsteps-out').innerText.trim();
+
+  const allTopics  = getActiveTopics();
+  const mid        = Math.ceil(allTopics.length / 2);
+
+  // Build payload
+  const payload = {
+    pupil:      name,
+    teacher,
+    yearGroup,
+    acYear,
+    topicsLeft:  allTopics.slice(0, mid),
+    topicsRight: allTopics.slice(mid),
+    strengths:   strengthsText,
+    nextSteps:   nextstepsText,
+    tickState:   Object.fromEntries(
+      Object.entries(tickState).filter(([,v]) => v === true)
+    )
+  };
+
+  // Write JSON and run Node generator via fetch to a local helper
+  // Since this is a static HTML file, we use a Blob URL approach with
+  // the embedded generator script written to disk then executed
+  const jsonStr = JSON.stringify(payload, null, 2);
+
+  // Write data file then run generator
+  fetch('/run-report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: jsonStr
+  })
+  .then(r => r.ok ? r.blob() : Promise.reject('Server error'))
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href    = url;
+    a.download = `Maths_Report_${name.replace(/\s+/g,'_')}.docx`;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+    showToast('Word document downloaded!');
+  })
+  .catch(() => {
+    // Fallback: write JSON to clipboard and instruct
+    downloadWordFallback(payload, name);
+  });
+}
+
+function downloadWordFallback(payload, name) {
+  // Write JSON to temp file via XMLHttpRequest to local Python server
+  // If no server available, run the generator directly in Node via exec
+  const { exec } = typeof require !== 'undefined' ? require('child_process') : {};
+  if (exec) {
+    const fs  = require('fs');
+    const path = require('path');
+    fs.writeFileSync('/tmp/report_data.json', JSON.stringify(payload));
+    const scriptPath = '/home/claude/generate_report.js';
+    exec(`node ${scriptPath}`, (err, stdout, stderr) => {
+      if (err) { showToast('Error: ' + stderr); return; }
+      const buf = fs.readFileSync('/tmp/report_output.docx');
+      const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `Maths_Report_${name.replace(/\s+/g,'_')}.docx`;
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+      showToast('Word document downloaded!');
+    });
+  } else {
+    downloadWordInBrowser(payload, name);
+  }
+}
+
+function downloadWordInBrowser(payload, name) {
+  // Correct DXA measurements extracted from original Math_report_example.docx
+  const CONTENT_COL  = 5228;
+  const CONTENT_W    = 10456;
+  const LBL_W        = 3544;
+  const SUB_W        = 576;
+  const FONT         = 'Book Antiqua';
+  const RATING_ROWS_DATA = [
+    'Character and conduct',
+    'Effort &amp; application',
+    'Depth of understanding',
+    'Quality of written work',
+    'Quality of oral contributions',
+    'Punctuality of work',
+    'Performance in tests'
+  ];
+  const RATING_COLS_DATA = ['Below Average','Average','Good','Outstanding'];
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function bp(text, bold=false, align='left'){
+    const b = bold ? '<w:b/>' : '';
+    return `<w:p><w:pPr><w:jc w:val="${align}"/><w:spacing w:after="0" w:before="0"/></w:pPr>` +
+      `<w:r><w:rPr>${b}<w:rFonts w:ascii="${FONT}" w:hAnsi="${FONT}"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>` +
+      `<w:t xml:space="preserve">${esc(text)}</w:t></w:r></w:p>`;
+  }
+  function emptyP(){ return '<w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr></w:p>'; }
+  function bdr(sz=4){ return `<w:top w:val="single" w:sz="${sz}" w:space="0" w:color="000000"/><w:left w:val="single" w:sz="${sz}" w:space="0" w:color="000000"/><w:bottom w:val="single" w:sz="${sz}" w:space="0" w:color="000000"/><w:right w:val="single" w:sz="${sz}" w:space="0" w:color="000000"/>`; }
+  function noBdr(){ return '<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000"/><w:right w:val="nil"/>'; }
+  function mar(t=60,b=60,l=100,r=100){ return `<w:tcMar><w:top w:w="${t}" w:type="dxa"/><w:left w:w="${l}" w:type="dxa"/><w:bottom w:w="${b}" w:type="dxa"/><w:right w:w="${r}" w:type="dxa"/></w:tcMar>`; }
+
+  function infoCell(label, val, w){
+    return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/><w:tcBorders>${noBdr()}</w:tcBorders>${mar(20,20,0,0)}</w:tcPr>${bp(label+' '+val,false)}</w:tc>`.replace(
+      bp(label+' '+val,false),
+      `<w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:rPr><w:b/><w:rFonts w:ascii="${FONT}" w:hAnsi="${FONT}"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">${esc(label)} </w:t></w:r><w:r><w:rPr><w:rFonts w:ascii="${FONT}" w:hAnsi="${FONT}"/><w:sz w:val="20"/></w:rPr><w:t>${esc(val)}</w:t></w:r></w:p>`
+    );
+  }
+
+  function contentCell(topics, showLabel, w){
+    const bullets = topics.length===0 ? emptyP() : topics.map(t=>bp('▪  '+t)).join('');
+    const lbl = showLabel ? bp('CONTENT COVERED:',true) : '';
+    return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/><w:tcBorders>${bdr()}</w:tcBorders>${mar()}</w:tcPr>${lbl}${bullets}</w:tc>`;
+  }
+
+  function bigCell(label, text, w, span=2){
+    const gs = span>1 ? `<w:gridSpan w:val="${span}"/>` : '';
+    const paras = text ? text.split(/\n+/).filter(Boolean).map(l=>bp(l)).join('') : emptyP();
+    return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${gs}<w:tcBorders>${bdr()}</w:tcBorders>${mar()}</w:tcPr>${bp(label,true)}${paras}</w:tc>`;
+  }
+
+  // Rating header row
+  const ratingHdrCells =
+    `<w:tc><w:tcPr><w:tcW w:w="${LBL_W}" w:type="dxa"/><w:tcBorders>${bdr()}</w:tcBorders>${mar(20,20,60,60)}</w:tcPr>${emptyP()}</w:tc>` +
+    RATING_COLS_DATA.map(col=>
+      `<w:tc><w:tcPr><w:tcW w:w="${SUB_W*3}" w:type="dxa"/><w:gridSpan w:val="3"/><w:tcBorders>${bdr()}</w:tcBorders>${mar(20,20,20,20)}</w:tcPr>${bp(col,true,'center')}</w:tc>`
+    ).join('');
+
+  // Rating body rows
+  const ratingBodyRows = RATING_ROWS_DATA.map(rowName=>{
+    const lbl = `<w:tc><w:tcPr><w:tcW w:w="${LBL_W}" w:type="dxa"/><w:tcBorders>${bdr()}</w:tcBorders>${mar(20,20,60,60)}<w:vAlign w:val="center"/></w:tcPr>${bp(rowName,true)}</w:tc>`;
+    let subcells = '';
+    RATING_COLS_DATA.forEach(col=>{
+      for(let i=0;i<3;i++){
+        // Decode HTML entities in rowName for key lookup
+        const key = rowName.replace(/&amp;/g,'&')+'|'+col+'|'+i;
+        const ticked = payload.tickState[key] === true;
+        const content = ticked ? bp('✓',false,'center') : emptyP();
+        subcells += `<w:tc><w:tcPr><w:tcW w:w="${SUB_W}" w:type="dxa"/><w:tcBorders>${bdr()}</w:tcBorders><w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar><w:vAlign w:val="center"/></w:tcPr>${content}</w:tc>`;
+      }
+    });
+    return `<w:tr><w:trPr><w:trHeight w:val="252" w:hRule="atLeast"/></w:trPr>${lbl}${subcells}</w:tr>`;
+  }).join('');
+
+  const gridCols = `<w:tblGrid><w:gridCol w:w="${LBL_W}"/>${Array(12).fill(`<w:gridCol w:w="${SUB_W}"/>`).join('')}</w:tblGrid>`;
+  const mainGrid = `<w:tblGrid><w:gridCol w:w="${CONTENT_COL}"/><w:gridCol w:w="${CONTENT_COL}"/></w:tblGrid>`;
+  function tblPr(w){ return `<w:tblPr><w:tblW w:w="${w}" w:type="dxa"/><w:tblBorders>${bdr()}</w:tblBorders></w:tblPr>`; }
+  function infoTblPr(w){ return `<w:tblPr><w:tblW w:w="${w}" w:type="dxa"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders></w:tblPr>`; }
+
+  const mathsHdr = `<w:p><w:pPr><w:spacing w:after="80" w:before="0"/></w:pPr><w:r><w:rPr><w:b/><w:rFonts w:ascii="${FONT}" w:hAnsi="${FONT}"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t>MATHEMATICS</w:t></w:r><w:r><w:rPr><w:rFonts w:ascii="${FONT}" w:hAnsi="${FONT}"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t xml:space="preserve">  Teacher: ${esc(payload.teacher)}</w:t></w:r></w:p>`;
+  const spacer = '<w:p><w:pPr><w:spacing w:after="80" w:before="0"/></w:pPr></w:p>';
+
+  const infoTable = `<w:tbl>${infoTblPr(CONTENT_W)}<w:tblGrid><w:gridCol w:w="${CONTENT_COL}"/><w:gridCol w:w="${CONTENT_COL}"/></w:tblGrid>` +
+    `<w:tr><w:trPr/>${infoCell('Pupil:',payload.pupil,CONTENT_COL)}${infoCell('Teacher:',payload.teacher,CONTENT_COL)}</w:tr>` +
+    `<w:tr><w:trPr/>${infoCell('Year Group:',payload.yearGroup,CONTENT_COL)}${infoCell('Academic Year:',payload.acYear,CONTENT_COL)}</w:tr>` +
+    `</w:tbl>`;
+
+  const mainTable = `<w:tbl>${tblPr(CONTENT_W)}${mainGrid}` +
+    `<w:tr><w:trPr><w:trHeight w:val="817" w:hRule="atLeast"/></w:trPr>${contentCell(payload.topicsLeft,true,CONTENT_COL)}${contentCell(payload.topicsRight,false,CONTENT_COL)}</w:tr>` +
+    `<w:tr><w:trPr><w:trHeight w:val="708" w:hRule="atLeast"/></w:trPr>${bigCell('STRENGTHS:',payload.strengths,CONTENT_W,2)}</w:tr>` +
+    `<w:tr><w:trPr><w:trHeight w:val="388" w:hRule="atLeast"/></w:trPr>${bigCell('NEXT STEPS:',payload.nextSteps,CONTENT_W,2)}</w:tr>` +
+    `</w:tbl>`;
+
+  const ratingTable = `<w:tbl>${tblPr(LBL_W+SUB_W*12)}${gridCols}` +
+    `<w:tr><w:trPr><w:trHeight w:val="252" w:hRule="atLeast"/></w:trPr>${ratingHdrCells}</w:tr>` +
+    ratingBodyRows +
+    `</w:tbl>`;
+
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14">
+<w:body>${mathsHdr}${infoTable}${spacer}${mainTable}${spacer}${ratingTable}
+<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr>
+</w:body></w:document>`;
+
+  const CT  = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+  const RELS= '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+  const DRELS='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+
+  function u8(s){ return new TextEncoder().encode(s); }
+  function u32(n){ const b=new Uint8Array(4); new DataView(b.buffer).setUint32(0,n,true); return b; }
+  function u16(n){ const b=new Uint8Array(2); new DataView(b.buffer).setUint16(0,n,true); return b; }
+  function cat(a){ const t=a.reduce((s,x)=>s+x.length,0), o=new Uint8Array(t); let p=0; a.forEach(x=>{o.set(x,p);p+=x.length;}); return o; }
+  function crc(d){ let c=0xFFFFFFFF; const t=[]; for(let i=0;i<256;i++){let v=i;for(let j=0;j<8;j++)v=v&1?0xEDB88320^(v>>>1):v>>>1;t[i]=v;} for(let i=0;i<d.length;i++)c=t[(c^d[i])&0xFF]^(c>>>8); return(c^0xFFFFFFFF)>>>0; }
+  function entry(name, data){ const n=u8(name),crcVal=crc(data); return { hdr: cat([new Uint8Array([0x50,0x4B,0x03,0x04,0x14,0,0,0,0,0,0,0,0,0]),u32(crcVal),u32(data.length),u32(data.length),u16(n.length),u16(0),n]), data, name, crcVal, size:data.length }; }
+
+  const files=[entry('[Content_Types].xml',u8(CT)),entry('_rels/.rels',u8(RELS)),entry('word/document.xml',u8(docXml)),entry('word/_rels/document.xml.rels',u8(DRELS))];
+  const parts=[]; let off=0; const dirs=[];
+  files.forEach(f=>{ const e=cat([f.hdr,f.data]); parts.push(e); const n=u8(f.name); dirs.push(cat([new Uint8Array([0x50,0x4B,0x01,0x02,0x14,0,0x14,0,0,0,0,0,0,0,0,0]),u32(f.crcVal),u32(f.size),u32(f.size),u16(n.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off),n])); off+=e.length; });
+  const cdSz=dirs.reduce((s,d)=>s+d.length,0);
+  const eocd=cat([new Uint8Array([0x50,0x4B,0x05,0x06,0,0,0,0]),u16(files.length),u16(files.length),u32(cdSz),u32(off),u16(0)]);
+  const zip=cat([...parts,...dirs,eocd]);
+
+  const blob=new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`Maths_Report_${name.replace(/\s+/g,'_')}.docx`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  showToast('Word document downloaded!');
+}
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function togglePanel(hdr){
+  const body=hdr.nextElementSibling;
+  body.classList.toggle('open');
+  hdr.querySelector('span:last-child').textContent=body.classList.contains('open')?'▲':'▼';
+}
+
+function clearAll(){
+  document.getElementById('f-name').value='';
+  document.getElementById('f-year').value='';
+  document.getElementById('f-acyear').value='';
+  document.getElementById('extra-topics').value='';
+  document.querySelectorAll('.pk-sel').forEach(s=>s.value='');
+  document.querySelectorAll('.rating-cell').forEach(c=>c.classList.remove('ticked'));
+  document.querySelectorAll('#fnd-topics input,#hgr-topics input').forEach(cb=>cb.checked=false);
+  document.getElementById('strength-topics').querySelectorAll('option').forEach(o=>o.selected=false);
+  document.getElementById('nextstep-topics').querySelectorAll('option').forEach(o=>o.selected=false);
+  Object.keys(selected).forEach(k=>delete selected[k]);
+  Object.keys(tickState).forEach(k=>tickState[k]=false);
+  Object.keys(topicChecked).forEach(k=>topicChecked[k]=false);
+  document.getElementById('strengths-out').innerHTML='';
+  document.getElementById('nextsteps-out').innerHTML='';
+  renderAll();
+  renderContent();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+buildTopicCheckboxes();
+buildRatingTable();
+buildPickers();
+renderContent();
+renderAll();
+</script>
+</body>
+</html>

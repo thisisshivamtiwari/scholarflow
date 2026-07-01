@@ -9,17 +9,19 @@ export const SyllabusReviewPage = () => {
   const { user } = useAuth()
   const { data, approveSyllabus, rejectSyllabus, isFetching } = useAppData()
 
-  if (user?.role !== 'headmaster') {
+  const role = user?.role
+  if (role !== 'headmaster' && role !== 'admin') {
     return <Navigate to="/app" replace />
   }
 
+  const pendingPath = role === 'admin' ? '/app/admin/pending' : '/app/headmaster/pending'
   const ws = workspaceId ? workspaceById(data, workspaceId) : undefined
   if (!ws) return <p className="text-sm text-muted-foreground">Not found.</p>
 
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        to="/app/headmaster/pending"
+        to={pendingPath}
         className="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
       >
         ← Pending tasks
@@ -31,6 +33,7 @@ export const SyllabusReviewPage = () => {
         {ws.topics.map((t) => (
           <li key={t.id} className="rounded-lg border border-border p-3">
             <span className="font-medium">{t.heading}</span> — {t.subHeading}
+            <p className="text-xs text-muted-foreground">Weeks {t.targetWeeks.join(', ')}</p>
           </li>
         ))}
       </ul>
@@ -48,7 +51,10 @@ export const SyllabusReviewPage = () => {
           type="button"
           loading={isFetching}
           loadingLabel="Rejecting…"
-          onClick={() => rejectSyllabus(ws.id)}
+          onClick={() => {
+            const reason = window.prompt('Rejection reason (optional):') ?? ''
+            rejectSyllabus(ws.id, reason || undefined)
+          }}
           className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           Reject

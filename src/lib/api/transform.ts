@@ -81,6 +81,8 @@ const mapWorkspace = (
   teacherUserId: w.teacher_user_id,
   curriculumStatus: w.curriculum_status,
   submittedAt: w.submitted_at ?? undefined,
+  rejectionReason: w.rejection_reason ?? undefined,
+  termWeeks: w.term_weeks ?? undefined,
   topics: topics
     .filter((t) => t.workspace_id === w.id)
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -110,6 +112,8 @@ export const fetchAppDataState = async (): Promise<AppDataState> => {
     timetableRes,
     changeRes,
     accountRes,
+    subjectReqRes,
+    behaviourRes,
     flaggedRes,
     conflictsRes,
   ] = await Promise.all([
@@ -125,6 +129,8 @@ export const fetchAppDataState = async (): Promise<AppDataState> => {
     supabase.from('timetable_slots').select('*'),
     supabase.from('change_requests').select('*').eq('status', 'pending'),
     supabase.from('account_requests').select('*').eq('status', 'pending'),
+    supabase.from('subject_requests').select('*').eq('status', 'pending'),
+    supabase.from('behaviour_records').select('*'),
     supabase.from('v_flagged_students').select('*'),
     supabase.from('v_timetable_conflicts').select('*'),
   ])
@@ -180,6 +186,7 @@ export const fetchAppDataState = async (): Promise<AppDataState> => {
       gradeThresholdPercent: school.grade_threshold_percent,
       attendanceThresholdPercent: school.attendance_threshold_percent,
       parentResourceAccess: school.parent_resource_access,
+      termWeeks: school.term_weeks ?? 6,
     },
     workspaces: workspaces.map((w) => mapWorkspace(w, topics, resources, tracking)),
     students: (studentsRes.data ?? []).map((s) => ({
@@ -236,6 +243,34 @@ export const fetchAppDataState = async (): Promise<AppDataState> => {
       email: a.email,
       requestedRole: a.requested_role as Role,
       requestedAt: a.requested_at,
+    })),
+    subjectRequests: (subjectReqRes.data ?? []).map((s) => ({
+      id: s.id,
+      teacherId: s.teacher_id,
+      subjectName: s.subject_name,
+      classLabel: s.class_label,
+      notes: s.notes,
+      requestedAt: s.created_at,
+    })),
+    behaviourPending: (behaviourRes.data ?? [])
+      .filter((b) => b.status === 'pending')
+      .map((b) => ({
+        id: b.id,
+        workspaceId: b.workspace_id,
+        studentId: b.student_id,
+        date: b.date,
+        rating: b.rating,
+        remark: b.remark,
+        recordedAt: b.created_at,
+      })),
+    behaviourRecords: (behaviourRes.data ?? []).map((b) => ({
+      id: b.id,
+      workspaceId: b.workspace_id,
+      studentId: b.student_id,
+      date: b.date,
+      rating: b.rating,
+      remark: b.remark,
+      status: b.status,
     })),
     flaggedStudents: (flaggedRes.data ?? []).map((f) => ({
       studentId: f.student_id,

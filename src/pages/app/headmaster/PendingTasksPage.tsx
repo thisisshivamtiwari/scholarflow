@@ -1,14 +1,89 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
+import { useProfiles } from '@/hooks/queries/useTmsData'
 import { studentName, workspaceById } from '@/lib/tms-helpers'
 import { AppDataLoading } from '@/components/app/AppDataLoading'
 import { LoadingButton } from '@/components/ui/LoadingButton'
 
 type Variant = 'headmaster' | 'admin'
 
+const SyllabusSection = ({
+  data,
+  variant,
+  isFetching,
+  approveSyllabus,
+  rejectSyllabus,
+}: {
+  data: ReturnType<typeof useAppData>['data']
+  variant: Variant
+  isFetching: boolean
+  approveSyllabus: (id: string) => void
+  rejectSyllabus: (id: string, reason?: string) => void
+}) => {
+  const reviewBase = variant === 'admin' ? '/app/admin' : '/app/headmaster'
+
+  return (
+    <section>
+      <h2 className="text-lg font-semibold text-foreground">Syllabi awaiting approval</h2>
+      <ul className="mt-3 space-y-3" role="list">
+        {data.syllabusPending.map((s) => {
+          const ws = workspaceById(data, s.workspaceId)
+          return (
+            <li
+              key={s.id}
+              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="font-medium text-foreground">
+                  {ws?.subjectName} · {ws?.classLabel}
+                </p>
+                <p className="text-xs text-muted-foreground">Submitted {s.submittedAt}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  to={`${reviewBase}/syllabus/${s.workspaceId}`}
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+                >
+                  Review
+                </Link>
+                <LoadingButton
+                  type="button"
+                  loading={isFetching}
+                  loadingLabel="Approving…"
+                  onClick={() => approveSyllabus(s.workspaceId)}
+                  className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
+                >
+                  Approve
+                </LoadingButton>
+                <LoadingButton
+                  type="button"
+                  loading={isFetching}
+                  loadingLabel="Rejecting…"
+                  onClick={() => {
+                    const reason = window.prompt('Rejection reason (optional):') ?? ''
+                    rejectSyllabus(s.workspaceId, reason || undefined)
+                  }}
+                  className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+                >
+                  Reject
+                </LoadingButton>
+              </div>
+            </li>
+          )
+        })}
+        {data.syllabusPending.length === 0 ? (
+          <li className="text-sm text-muted-foreground">None pending.</li>
+        ) : null}
+      </ul>
+    </section>
+  )
+}
+
 export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
   const { user } = useAuth()
+  const { data: profiles } = useProfiles()
   const {
     data,
     approveSyllabus,
@@ -17,8 +92,14 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
     rejectChangeRequest,
     approveAccountRequest,
     rejectAccountRequest,
+    approveSubjectRequest,
+    rejectSubjectRequest,
+    approveBehaviourRecord,
+    rejectBehaviourRecord,
     isFetching,
   } = useAppData()
+
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
 
   const isHm = variant === 'headmaster' && user?.role === 'headmaster'
   const isAd = variant === 'admin' && user?.role === 'admin'
@@ -27,6 +108,9 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
     return <p className="text-sm text-muted-foreground">Access denied.</p>
   }
 
+  const teacherName = (id: string) =>
+    profiles?.find((p) => p.id === id)?.display_name ?? id
+
   return (
     <AppDataLoading>
       <div className="mx-auto max-w-4xl space-y-10">
@@ -34,42 +118,91 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
           <h1 className="text-2xl font-semibold text-foreground">Pending tasks</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isHm
-              ? 'Governance and school-wide actions (PRD §8.1)'
-              : 'Operational tasks without syllabus approval (PRD §8.1)'}
+              ? 'Governance and school-wide actions'
+              : 'Operational and curriculum approval tasks'}
           </p>
         </div>
 
+        {isHm || isAd ? (
+          <SyllabusSection
+            data={data}
+            variant={variant}
+            isFetching={isFetching}
+            approveSyllabus={approveSyllabus}
+            rejectSyllabus={rejectSyllabus}
+          />
+        ) : null}
+
+        {isHm || isAd ? (
+          <section>
+            <h2 className="text-lg font-semibold text-foreground">Subject requests</h2>
+            <ul className="mt-3 space-y-3" role="list">
+              {data.subjectRequests.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {s.subjectName} · {s.classLabel}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {teacherName(s.teacherId)} · {s.requestedAt}
+                    </p>
+                    {s.notes ? (
+                      <p className="mt-1 text-sm text-muted-foreground">{s.notes}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex gap-2">
+                    <LoadingButton
+                      type="button"
+                      loading={isFetching}
+                      loadingLabel="Approving…"
+                      onClick={() => approveSubjectRequest(s.id)}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
+                    >
+                      Approve
+                    </LoadingButton>
+                    <LoadingButton
+                      type="button"
+                      loading={isFetching}
+                      loadingLabel="Rejecting…"
+                      onClick={() => rejectSubjectRequest(s.id)}
+                      className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+                    >
+                      Reject
+                    </LoadingButton>
+                  </div>
+                </li>
+              ))}
+              {data.subjectRequests.length === 0 ? (
+                <li className="text-sm text-muted-foreground">None pending.</li>
+              ) : null}
+            </ul>
+          </section>
+        ) : null}
+
         {isHm ? (
           <section>
-            <h2 className="text-lg font-semibold text-foreground">Syllabi awaiting approval</h2>
+            <h2 className="text-lg font-semibold text-foreground">Behaviour records</h2>
             <ul className="mt-3 space-y-3" role="list">
-              {data.syllabusPending.map((s) => {
-                const ws = workspaceById(data, s.workspaceId)
+              {data.behaviourPending.map((b) => {
+                const ws = workspaceById(data, b.workspaceId)
                 return (
-                  <li
-                    key={s.id}
-                    className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {ws?.subjectName} · {ws?.classLabel}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Submitted {s.submittedAt}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        to={`/app/headmaster/syllabus/${s.workspaceId}`}
-                        className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
-                      >
-                        Review
-                      </Link>
+                  <li key={b.id} className="rounded-xl border border-border bg-card p-4">
+                    <p className="font-medium text-foreground">
+                      {studentName(data, b.studentId)} · {ws?.subjectName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Rating {b.rating}/5 · {b.date}
+                    </p>
+                    <p className="mt-1 text-sm">{b.remark}</p>
+                    <div className="mt-3 flex gap-2">
                       <LoadingButton
                         type="button"
                         loading={isFetching}
                         loadingLabel="Approving…"
-                        onClick={() => approveSyllabus(s.workspaceId)}
+                        onClick={() => approveBehaviourRecord(b.id)}
                         className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground"
                       >
                         Approve
@@ -78,8 +211,8 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                         type="button"
                         loading={isFetching}
                         loadingLabel="Rejecting…"
-                        onClick={() => rejectSyllabus(s.workspaceId)}
-                        className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+                        onClick={() => rejectBehaviourRecord(b.id)}
+                        className="rounded-lg border border-border px-3 py-1.5 text-sm"
                       >
                         Reject
                       </LoadingButton>
@@ -87,8 +220,8 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                   </li>
                 )
               })}
-              {data.syllabusPending.length === 0 ? (
-                <li className="text-sm text-muted-foreground">None pending.</li>
+              {data.behaviourPending.length === 0 ? (
+                <p className="text-sm text-muted-foreground">None pending.</p>
               ) : null}
             </ul>
           </section>
@@ -165,9 +298,13 @@ export const PendingTasksPage = ({ variant }: { variant: Variant }) => {
                   </LoadingButton>
                   <LoadingButton
                     type="button"
-                    loading={isFetching}
+                    loading={isFetching || rejectingId === a.id}
                     loadingLabel="Rejecting…"
-                    onClick={() => rejectAccountRequest(a.id)}
+                    onClick={() => {
+                      setRejectingId(a.id)
+                      rejectAccountRequest(a.id)
+                      setRejectingId(null)
+                    }}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm"
                   >
                     Reject

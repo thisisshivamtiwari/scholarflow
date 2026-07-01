@@ -159,3 +159,30 @@ INSERT INTO attendance_reason_codes (school_id, code, label) VALUES
   ('a0000000-0000-4000-8000-000000000001', 'Medical', 'Medical'),
   ('a0000000-0000-4000-8000-000000000001', 'Unexplained', 'Unexplained'),
   ('a0000000-0000-4000-8000-000000000001', 'School Trip', 'School Trip');
+
+-- GCSE Mathematics curriculum template (PRD SF-004)
+INSERT INTO curriculum_templates (id, school_id, school_subject_id, name, term_weeks)
+SELECT
+  'f1000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000001',
+  ss.id,
+  'Mathematics GCSE',
+  6
+FROM school_subjects ss
+WHERE ss.school_id = 'a0000000-0000-4000-8000-000000000001' AND ss.name = 'Mathematics';
+
+INSERT INTO template_topics (template_id, heading, sub_heading, description, target_weeks, sort_order) VALUES
+  ('f1000000-0000-4000-8000-000000000001', 'Number: integers, decimals & rounding', 'Foundation', '', '{1}', 0),
+  ('f1000000-0000-4000-8000-000000000001', 'Fractions, decimals & percentages', 'Foundation', '', '{1}', 1),
+  ('f1000000-0000-4000-8000-000000000001', 'Ratio & proportion', 'Foundation', '', '{2}', 2),
+  ('f1000000-0000-4000-8000-000000000001', 'Indices & standard form', 'Foundation', '', '{2}', 3),
+  ('f1000000-0000-4000-8000-000000000001', 'Algebra: expressions & formulae', 'Foundation', '', '{3}', 4),
+  ('f1000000-0000-4000-8000-000000000001', 'Algebra: equations & inequalities', 'Foundation', '', '{3}', 5),
+  ('f1000000-0000-4000-8000-000000000001', 'Sequences & nth term', 'Foundation', '', '{4}', 6),
+  ('f1000000-0000-4000-8000-000000000001', 'Coordinates & straight-line graphs', 'Foundation', '', '{4}', 7),
+  ('f1000000-0000-4000-8000-000000000001', 'Geometry: angles & shape properties', 'Foundation', '', '{5}', 8),
+  ('f1000000-0000-4000-8000-000000000001', 'Perimeter, area & volume', 'Foundation', '', '{5}', 9),
+  ('f1000000-0000-4000-8000-000000000001', 'Statistics: averages & range', 'Foundation', '', '{6}', 10),
+  ('f1000000-0000-4000-8000-000000000001', 'Probability', 'Foundation', '', '{6}', 11),
+  ('f1000000-0000-4000-8000-000000000001', 'Quadratic equations (completing the square / formula)', 'Higher', '', '{6}', 12),
+  ('f1000000-0000-4000-8000-000000000001', 'Vectors', 'Higher', '', '{6}', 13);

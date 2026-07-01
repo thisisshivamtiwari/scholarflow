@@ -7,9 +7,12 @@ import type { Role } from '@/types/tms'
 
 export const UsersAdminPage = () => {
   const { data: profiles, isLoading } = useProfiles()
-  const { create, deactivate, reactivate, resetPassword, updateRole, importStudents } =
+  const { create, deactivate, reactivate, setPassword, updateRole, importStudents } =
     useUserAdminMutations()
   const [showCreate, setShowCreate] = useState(false)
+  const [pwdUserId, setPwdUserId] = useState<string | null>(null)
+  const [tempPassword, setTempPassword] = useState('')
+  const [pwdShown, setPwdShown] = useState<string | null>(null)
   const [form, setForm] = useState({
     username: '',
     displayName: '',
@@ -19,11 +22,38 @@ export const UsersAdminPage = () => {
     classLabel: '',
   })
 
+  const handleSetPassword = () => {
+    if (!pwdUserId || !tempPassword.trim()) return
+    setPassword.mutate(
+      { userId: pwdUserId, password: tempPassword },
+      {
+        onSuccess: () => {
+          setPwdShown(tempPassword)
+          setTempPassword('')
+          setPwdUserId(null)
+        },
+      },
+    )
+  }
+
   return (
     <AppDataLoading>
       <div className="mx-auto max-w-4xl space-y-6">
         <h1 className="text-2xl font-semibold text-foreground">User accounts</h1>
-        <p className="text-sm text-muted-foreground">PRD §8.7 — create, deactivate, reset password.</p>
+        <p className="text-sm text-muted-foreground">
+          Create users, manage roles, and set temporary passwords.
+        </p>
+
+        {pwdShown ? (
+          <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-4 text-sm" role="status">
+            Temporary password set: <strong className="font-mono">{pwdShown}</strong> — share it securely
+            with the user, then{' '}
+            <button type="button" className="underline" onClick={() => setPwdShown(null)}>
+              dismiss
+            </button>
+            .
+          </p>
+        ) : null}
 
         <div className="flex flex-wrap gap-2">
           <button
@@ -75,7 +105,7 @@ export const UsersAdminPage = () => {
               <option value="headmaster">Headmaster</option>
               <option value="admin">Admin</option>
             </select>
-            <input placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
+            <input placeholder="Initial password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
             <input placeholder="Class label (students)" value={form.classLabel} onChange={(e) => setForm({ ...form, classLabel: e.target.value })} className="rounded-lg border px-3 py-2 text-sm" />
             <LoadingButton
               type="submit"
@@ -88,12 +118,40 @@ export const UsersAdminPage = () => {
           </form>
         ) : null}
 
-        <QuerySkeleton isLoading={isLoading} variant="table" tableColumns={5}>
+        {pwdUserId ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <p className="text-sm font-medium">Set temporary password</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input
+                type="text"
+                value={tempPassword}
+                onChange={(e) => setTempPassword(e.target.value)}
+                placeholder="New password"
+                className="flex-1 rounded-lg border px-3 py-2 text-sm"
+              />
+              <LoadingButton
+                type="button"
+                loading={setPassword.isPending}
+                loadingLabel="Saving…"
+                onClick={handleSetPassword}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                Save password
+              </LoadingButton>
+              <button type="button" onClick={() => setPwdUserId(null)} className="rounded-lg border px-4 py-2 text-sm">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        <QuerySkeleton isLoading={isLoading} variant="table" tableColumns={6}>
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50">
               <tr>
                 <th className="p-3">Name</th>
+                <th className="p-3">Username</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Role</th>
                 <th className="p-3">Status</th>
@@ -104,6 +162,7 @@ export const UsersAdminPage = () => {
                 {(profiles ?? []).map((u) => (
                   <tr key={u.id} className="border-t border-border">
                     <td className="p-3">{u.display_name}</td>
+                    <td className="p-3 font-mono text-xs">{u.username}</td>
                     <td className="p-3">{u.email}</td>
                     <td className="p-3 capitalize">{u.role}</td>
                     <td className="p-3">{u.active ? 'Active' : 'Inactive'}</td>
@@ -114,7 +173,7 @@ export const UsersAdminPage = () => {
                         ) : (
                           <button type="button" onClick={() => reactivate.mutate(u.id)} className="text-xs text-primary underline">Reactivate</button>
                         )}
-                        <button type="button" onClick={() => resetPassword.mutate(u.id)} className="text-xs underline">Reset pwd</button>
+                        <button type="button" onClick={() => setPwdUserId(u.id)} className="text-xs underline">Set password</button>
                         <select
                           defaultValue={u.role}
                           onChange={(e) => updateRole.mutate({ userId: u.id, role: e.target.value as Role })}

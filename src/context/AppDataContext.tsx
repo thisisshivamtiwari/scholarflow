@@ -14,11 +14,16 @@ export const useAppData = () => {
     error: q.error,
     refetch: q.refetch,
     approveSyllabus: (workspaceId: string) => q.approveSyllabus.mutate(workspaceId),
-    rejectSyllabus: (workspaceId: string) => q.rejectSyllabus.mutate(workspaceId),
+    rejectSyllabus: (workspaceId: string, reason?: string) =>
+      q.rejectSyllabus.mutate({ workspaceId, reason }),
     approveChangeRequest: (requestId: string) => q.approveChangeRequest.mutate(requestId),
     rejectChangeRequest: (requestId: string) => q.rejectChangeRequest.mutate(requestId),
     approveAccountRequest: (requestId: string) => q.approveAccountRequest.mutate(requestId),
     rejectAccountRequest: (requestId: string) => q.rejectAccountRequest.mutate(requestId),
+    approveSubjectRequest: (requestId: string) => q.approveSubjectRequest.mutate(requestId),
+    rejectSubjectRequest: (requestId: string) => q.rejectSubjectRequest.mutate(requestId),
+    approveBehaviourRecord: (recordId: string) => q.approveBehaviourRecord.mutate(recordId),
+    rejectBehaviourRecord: (recordId: string) => q.rejectBehaviourRecord.mutate(recordId),
     submitCurriculumForApproval: (workspaceId: string) =>
       q.submitCurriculumForApproval.mutate(workspaceId),
     setWorkspaceStatus: (workspaceId: string, status: CurriculumStatus) =>
@@ -26,6 +31,7 @@ export const useAppData = () => {
     addTopic: q.addTopic.mutate,
     deleteTopic: (id: string) => q.deleteTopic.mutate(id),
     reorderTopics: (ids: string[]) => q.reorderTopics.mutate(ids),
+    updateTopic: q.updateTopic.mutate,
     upsertTracking: q.upsertTracking.mutate,
     addResource: q.addResource.mutate,
     toggleResourceVisibility: q.toggleResourceVisibility.mutate,

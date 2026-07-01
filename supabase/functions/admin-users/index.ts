@@ -5,6 +5,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+async function assertSameSchool(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  callerSchoolId: string,
+  targetUserId: string,
+) {
+  const { data: target } = await supabaseAdmin
+    .from('profiles')
+    .select('school_id')
+    .eq('id', targetUserId)
+    .single()
+  if (!target || target.school_id !== callerSchoolId) {
+    throw new Error('User not found in your school')
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -68,14 +83,27 @@ Deno.serve(async (req) => {
         })
         return json({ ok: true, userId: authUser.user.id })
       }
-      case 'deactivate':
+      case 'deactivate': {
+        await assertSameSchool(supabaseAdmin, profile.school_id, payload.userId as string)
         await supabaseAdmin.from('profiles').update({ active: false }).eq('id', payload.userId)
         return json({ ok: true })
-      case 'reactivate':
+      }
+      case 'reactivate': {
+        await assertSameSchool(supabaseAdmin, profile.school_id, payload.userId as string)
         await supabaseAdmin.from('profiles').update({ active: true }).eq('id', payload.userId)
         return json({ ok: true })
+      }
+      case 'setPassword': {
+        const { userId, password } = payload as { userId: string; password: string }
+        await assertSameSchool(supabaseAdmin, profile.school_id, userId)
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, { password })
+        if (error) throw error
+        return json({ ok: true })
+      }
       case 'resetPassword': {
-        const { data: p } = await supabaseAdmin.from('profiles').select('email').eq('id', payload.userId).single()
+        const userId = payload.userId as string
+        await assertSameSchool(supabaseAdmin, profile.school_id, userId)
+        const { data: p } = await supabaseAdmin.from('profiles').select('email').eq('id', userId).single()
         if (!p) throw new Error('User not found')
         await supabaseAdmin.auth.resetPasswordForEmail(p.email)
         await supabaseAdmin.from('notification_log').insert({
@@ -87,9 +115,11 @@ Deno.serve(async (req) => {
         })
         return json({ ok: true })
       }
-      case 'updateRole':
+      case 'updateRole': {
+        await assertSameSchool(supabaseAdmin, profile.school_id, payload.userId as string)
         await supabaseAdmin.from('profiles').update({ role: payload.role }).eq('id', payload.userId)
         return json({ ok: true })
+      }
       case 'importStudents': {
         const csvText = payload.csvText as string
         const lines = csvText.trim().split('\n').slice(1)
@@ -127,7 +157,8 @@ Deno.serve(async (req) => {
   }
 })
 
-const json = (data: unknown) =>
-  new Response(JSON.stringify(data), {
+function json(data: unknown) {
+  return new Response(JSON.stringify(data), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}

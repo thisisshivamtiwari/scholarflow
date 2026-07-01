@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 import { SITE } from '@/constants/site'
 import { AnimatedMount } from '@/components/motion/AnimatedMount'
 import { Spinner } from '@/components/ui/Spinner'
-import { useAccountRequestSubmit } from '@/hooks/queries/useTmsData'
-import { DEMO_SCHOOL_ID } from '@/constants/site'
+import { useAccountRequestSubmit, useOnboardingSchools } from '@/hooks/queries/useTmsData'
 
 export const GetStartedPage = () => {
   const submit = useAccountRequestSubmit()
+  const { data: schools, isLoading: schoolsLoading } = useOnboardingSchools()
+  const [schoolId, setSchoolId] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,10 +20,16 @@ export const GetStartedPage = () => {
     const lastName = String(fd.get('lastName') ?? '')
     const email = String(fd.get('workEmail') ?? '')
     const notes = String(fd.get('notes') ?? '')
+    const selectedSchool = String(fd.get('schoolId') ?? schoolId)
+
+    if (!selectedSchool) {
+      setError('Please select your school.')
+      return
+    }
 
     try {
       await submit.mutateAsync({
-        schoolExternalId: DEMO_SCHOOL_ID,
+        schoolExternalId: selectedSchool,
         name: `${firstName} ${lastName}`.trim(),
         email,
         requestedRole: 'teacher',
@@ -42,7 +49,7 @@ export const GetStartedPage = () => {
             Request a {SITE.name} account
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Submit a request for admin approval (PRD §8.7.2). Demo school ID: {DEMO_SCHOOL_ID}.
+            Submit a request for your school&apos;s admin to review and approve.
           </p>
 
           {submitted ? (
@@ -51,6 +58,29 @@ export const GetStartedPage = () => {
             </p>
           ) : (
             <form className="mt-8 space-y-4" onSubmit={(e) => void handleSubmit(e)}>
+              <div>
+                <label htmlFor="schoolId" className="block text-sm font-medium">
+                  School
+                </label>
+                <select
+                  id="schoolId"
+                  name="schoolId"
+                  required
+                  value={schoolId}
+                  onChange={(e) => setSchoolId(e.target.value)}
+                  disabled={schoolsLoading}
+                  className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-sm"
+                >
+                  <option value="">
+                    {schoolsLoading ? 'Loading schools…' : 'Select your school'}
+                  </option>
+                  {(schools ?? []).map((s) => (
+                    <option key={s.external_id} value={s.external_id}>
+                      {s.name} ({s.external_id})
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium">First name</label>
